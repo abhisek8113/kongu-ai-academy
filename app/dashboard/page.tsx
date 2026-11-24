@@ -1,0 +1,74 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getUserAndProfile } from "@/lib/supabase/server";
+import { tracks } from "@/lib/labs";
+
+export const metadata = { title: "Dashboard" };
+export const dynamic = "force-dynamic";
+
+export default async function Dashboard() {
+  const { supabase, user, profile } = await getUserAndProfile();
+  if (!user) redirect("/login?next=/dashboard");
+  const [{ data: progress }, { data: enrolments }, { data: certs }] = await Promise.all([
+    supabase.from("lab_progress").select("lab_id, completed_at").eq("user_id", user.id),
+    supabase.from("enrolments").select("id, status, batches(title, track, starts_on)").eq("user_id", user.id),
+    supabase.from("certificates").select("*").eq("user_id", user.id),
+  ]);
+  const done = new Set((progress ?? []).map((p: any) => p.lab_id));
+  const total = tracks.reduce((n, t) => n + t.labs.length, 0);
+  return (
+    <div className="wrap py-12">
+      <h1 className="text-4xl font-extrabold">Hello{profile?.full_name ? `, ${profile.full_name}` : ""}</h1>
+      <p className="mt-2 text-[#5d5550]">{done.size} of {total} labs completed{profile?.institution ? ` · ${profile.institution}` : ""}</p>
+
+      <h2 className="mt-10 text-2xl font-bold">Lab progress</h2>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {tracks.map((t) => {
+          const n = t.labs.filter((l) => done.has(l.id)).length;
+          const pct = Math.round((n / t.labs.length) * 100);
+          return (
+            <Link key={t.slug} href={`/labs/${t.slug}`} className="card hover:ring-2 hover:ring-saffron">
+              <div className="flex items-center justify-between"><span className="font-bold">{t.name}</span><span className="text-sm">{n}/{t.labs.length}</span></div>
+              <div className="mt-3 h-2 rounded-full bg-white"><div className="h-2 rounded-full" style={{ width: `${pct}%`, background: t.color }} /></div>
+              <div className="mt-2 text-sm text-[#5d5550]">{pct === 100 ? "Track complete" : n === 0 ? "Start track →" : "Continue →"}</div>
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="mt-10 grid gap-8 lg:grid-cols-2">
+        <section>
+          <h2 className="text-2xl font-bold">My programmes</h2>
+          {(enrolments ?? []).length === 0 ? (
+            <p className="card mt-4">No enrolments yet. <Link href="/programmes" className="font-semibold text-madder underline">Browse open programmes</Link>.</p>
+          ) : (
+            <ul className="mt-4 grid gap-3">
+              {(enrolments ?? []).map((e: any) => (
+                <li key={e.id} className="card flex items-center justify-between gap-3">
+                  <span><b>{e.batches?.title}</b><br /><span className="text-sm text-[#5d5550]">{e.batches?.starts_on ?? "Date to be announced"}</span></span>
+                  <span className="pill bg-white">{e.status}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        <section>
+          <h2 className="text-2xl font-bold">My certificates</h2>
+          {(certs ?? []).length === 0 ? (
+            <p className="card mt-4">Certificates appear here once your programme is completed.</p>
+          ) : (
+            <ul className="mt-4 grid gap-3">
+              {(certs ?? []).map((c: any) => (
+                <li key={c.id} className="card">
+                  <b>{c.programme}</b>
+                  <div className="text-sm text-[#5d5550]">ID {c.id} · issued {c.issued_on}</div>
+                  <Link href={`/verify/${c.id}`} className="text-sm font-semibold text-madder underline">Verification link</Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
