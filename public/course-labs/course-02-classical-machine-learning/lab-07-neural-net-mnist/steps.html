@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_blank">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Lab 07 — Neural Net from Scratch — MNIST</title>
+<style>
+body { font-family: Georgia, 'Times New Roman', serif; max-width: 46rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #111; }
+h1, h2, h3, h4, h5, h6 { font-family: system-ui, -apple-system, sans-serif; line-height: 1.25; }
+h1 { font-size: 1.75rem; border-bottom: 2px solid #222; padding-bottom: 0.3rem; }
+h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 1px solid #bbb; padding-bottom: 0.2rem; }
+h3 { font-size: 1.1rem; margin-top: 1.4rem; }
+h4 { font-size: 1rem; margin-top: 1.1rem; color: #222; }
+code, pre { font-family: ui-monospace, Consolas, 'Courier New', monospace; font-size: 0.9em; }
+code { background: #f2f2f2; padding: 0.1em 0.3em; border-radius: 3px; }
+pre { background: #f6f6f6; border: 1px solid #ddd; padding: 0.85rem 1rem; overflow-x: auto; border-radius: 4px; }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid #888; margin: 1rem 0; padding: 0.4rem 0 0.4rem 1rem; color: #333; background: #fafafa; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-family: system-ui, sans-serif; font-size: 0.92rem; }
+th, td { border: 1px solid #ccc; padding: 0.4rem 0.55rem; text-align: left; }
+th { background: #eee; }
+.meta { font-family: system-ui, sans-serif; font-size: 0.95rem; background: #f0f4f8; border: 1px solid #ccd; padding: 0.75rem 1rem; border-radius: 4px; }
+.meta strong { display: inline-block; min-width: 7rem; }
+hr { border: none; border-top: 1px solid #ccc; margin: 1.5rem 0; }
+.colab { font-family: system-ui, sans-serif; font-size: 0.92rem; background: #e8f5e9; border: 1px solid #a5d6a7; padding: 0.75rem 1rem; border-radius: 4px; }
+.colab ol { margin: 0.4rem 0; padding-left: 1.2rem; }
+.colab img { max-width: 100%; height: auto; display: block; margin: 0.3rem 0; }
+details { margin: 0.6rem 0; padding: 0.5rem 0.75rem; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; }
+details summary { cursor: pointer; font-family: system-ui, sans-serif; font-weight: 600; }
+details p { margin: 0.4rem 0 0; }
+.next { font-family: system-ui, sans-serif; font-size: 0.95rem; background: #fff8e1; border: 1px solid #ffe082; padding: 0.75rem 1rem; border-radius: 4px; }
+footer { font-family: system-ui, sans-serif; font-size: 0.85rem; color: #555; margin-top: 2.5rem; border-top: 1px solid #ccc; padding-top: 0.75rem; }
+</style>
+</head>
+<body>
+<h1>Lab 07 — Neural Net from Scratch — MNIST</h1>
+<div class="meta">
+<p><strong>Track</strong> Deep Learning Track</p>
+<p><strong>Level</strong> Intermediate–Advanced · <strong>Time</strong> ~75 min · <strong>Env</strong> 🟢 Colab only</p>
+<p><strong>Executable lab</strong> open <code>lab-07-neural-net-mnist.ipynb</code> in this folder</p>
+</div>
+
+
+
+<h2>Learning goals</h2>
+<ul><li>Build a feed-forward MLP with numpy only</li><li>Implement forward pass, ReLU, softmax, cross-entropy</li><li>Train with one epoch loop and plot accuracy curve</li><li>Compare learning rates and inspect confusion</li></ul>
+
+<hr/>
+<h2>Computer Vision: Handwritten Digit Recognition with a Neural Network from Scratch</h2>
+<blockquote><strong>Scenario:</strong> You are building the core engine for a postal service that must automatically read handwritten ZIP codes on envelopes. Before reaching for a deep-learning framework, your team wants to understand exactly what happens inside a neural network — the forward pass, the loss, and the gradient updates — by building one from scratch with numpy only. <strong>You will learn:</strong> perceptron → MLP intuition, forward pass with matrix multiplication, ReLU and softmax activations, cross-entropy loss, one full backpropagation training epoch, learning-rate effects, and reading a confusion matrix. <strong>Time:</strong> ~75 minutes. <strong>Level:</strong> Intermediate–Advanced. <strong>Needs:</strong> pandas + numpy + matplotlib. <strong>Env:</strong> 🟢 Colab only.</blockquote>
+<h3>Mental Map</h3>
+<table><thead><tr><th>Concept</th><th>Where it appears</th><th>Why it matters</th></tr></thead><tbody>
+<tr><td>Perceptron → MLP</td><td>Section 1</td><td>One neuron can't separate digits; layers can</td></tr>
+<tr><td>Forward pass</td><td>Section 1</td><td>Matrix multiply + activation = prediction</td></tr>
+<tr><td>ReLU / softmax</td><td>Section 1</td><td>Non-linearity + probability distribution</td></tr>
+<tr><td>Cross-entropy loss</td><td>Section 2</td><td>How wrong are we, numerically?</td></tr>
+<tr><td>Backpropagation</td><td>Section 2</td><td>Chain rule assigns blame to each weight</td></tr>
+<tr><td>Learning rate</td><td>Section 2</td><td>Too big diverges, too small crawls</td></tr>
+<tr><td>Confusion matrix</td><td>Exercise 2</td><td>Which digits get mixed up?</td></tr>
+</tbody></table>
+<hr/>
+<h2>1. From Perceptron to MLP: The Forward Pass</h2>
+<p>Every time you unlock your phone with your face, scan a document into searchable text, or let your bank flag a suspicious transaction, a neural network is doing the recognizing. But before these systems can recognize anything, they have to <em>learn</em> — and learning starts with understanding the forward pass: the exact computation that turns a pile of pixel numbers into a prediction. This section builds that computation by hand, so that when you later call <code>model.fit()</code> in a framework, you know precisely what is happening under the hood.</p>
+<p>A <strong>perceptron</strong> is a single neuron: it computes <code>output = activation(w · x + b)</code>. Picture it as a voting panel: each input pixel casts a vote weighted by how strongly the neuron cares about it, the bias sets the panel's overall enthusiasm, and the activation decides whether the neuron "fires." A single perceptron can only draw one straight line through data — it fails on anything non-linearly separable (like distinguishing handwritten 3s from 8s). The fix is a <strong>multi-layer perceptron (MLP)</strong>: stack neurons into layers so the network can carve the input space into complex regions.</p>
+<p>Think of the hidden layer as a team of 64 feature detectors. The first layer's weights learn to respond to simple patterns — edges, corners, loops of ink. The output layer then votes on which digit those features collectively suggest. No single neuron "knows" what a 7 is; the knowledge is distributed across the weights, which is exactly what makes neural networks both powerful and hard to interpret.</p>
+<p>Our architecture for MNIST:</p>
+<pre><code>Input (784) → Dense(64, ReLU) → Dense(10, softmax)</code></pre>
+<ul>
+<li><strong>784 inputs</strong> = one per pixel in a 28×28 grayscale image.</li>
+<li><strong>64 hidden neurons</strong> with <strong>ReLU</strong> (<code>max(0, z)</code>) — the non-linearity that makes deep networks work. Without a non-linear activation, stacking layers is pointless: two linear collapses are still one linear collapse. ReLU passes positive signals through unchanged and zeros out negative ones, which keeps gradients flowing during training. Sigmoid, the older alternative, squashes everything into (0, 1) and its gradient shrinks toward zero for large inputs — the "vanishing gradient" problem that used to stall deep networks.</li>
+<li><strong>10 outputs</strong> with <strong>softmax</strong> — converts raw scores into a probability distribution over digits 0–9.</li>
+</ul>
+<p>The forward pass is just matrix multiplication plus activation, applied layer by layer. The code below loads 1,000 MNIST images, initializes small random weights, and runs one forward pass — no training yet, just the raw machinery:</p>
+<pre><code class="language-python">import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+# Load the first 1000 rows — enough to train in seconds on CPU
+df = pd.read_csv(&quot;mnist_train.csv&quot;, nrows=1000)
+X = df.iloc[:, 1:].to_numpy(dtype=float) / 255.0   # pixels → [0, 1]
+y = df[&quot;label&quot;].to_numpy()                          # digit labels 0–9
+
+# One-hot encode labels: digit 3 → [0,0,0,1,0,0,0,0,0,0]
+Y = np.eye(10)[y]
+
+# Initialize weights (small random values) and biases (zeros)
+rng = np.random.default_rng(42)
+W1 = rng.normal(0, 0.1, size=(784, 64))
+b1 = np.zeros(64)
+W2 = rng.normal(0, 0.1, size=(64, 10))
+b2 = np.zeros(10)
+
+def relu(z):
+    return np.maximum(z, 0)
+
+def softmax(z):
+    z = z - z.max(axis=1, keepdims=True)   # numerical stability
+    e = np.exp(z)
+    return e / e.sum(axis=1, keepdims=True)
+
+# Forward pass
+z1 = X @ W1 + b1        # (1000, 64)  — hidden pre-activation
+a1 = relu(z1)           # (1000, 64)  — hidden activation
+z2 = a1 @ W2 + b2       # (1000, 10)  — output pre-activation
+probs = softmax(z2)     # (1000, 10)  — class probabilities
+
+predicted = probs.argmax(axis=1)
+accuracy = (predicted == y).mean()
+print(f&quot;Untrained accuracy: {accuracy:.4f}  (random guessing ≈ 0.10)&quot;)
+print(f&quot;Probability row sums to 1: {np.allclose(probs.sum(axis=1), 1.0)}&quot;)
+print(f&quot;Sample prediction for row 0: digit {predicted[0]}, true label {y[0]}&quot;)</code></pre>
+<p><strong>What to notice:</strong></p>
+<ol>
+<li>Untrained accuracy is ~0.06–0.10, close to random guessing (1/10) — the network knows nothing yet.</li>
+<li>Each row of <code>probs</code> sums to exactly 1.0 — softmax guarantees a valid probability distribution.</li>
+<li><code>X @ W1</code> is a single matrix multiply: (1000×784) @ (784×64) → (1000×64). The whole batch is processed at once.</li>
+</ol>
+<blockquote><strong>Pitfall:</strong> Forgetting to scale pixels to [0, 1]. Raw pixel values (0–255) make the initial activations huge, softmax saturates, and gradients vanish — the network will barely learn.</blockquote>
+<hr/>
+<h2>2. Training: Cross-Entropy Loss and Backpropagation</h2>
+<p><strong>Cross-entropy loss</strong> measures how far the predicted probability distribution is from the true one. For a single example with true class <code>c</code>: <code>loss = -log(p_c)</code>. Averaged over the batch:</p>
+<pre><code>loss = -mean( log( probs[range(N), y] ) )</code></pre>
+<p><strong>Backpropagation</strong> applies the chain rule to compute how much each weight contributed to the error, then gradient descent nudges each weight opposite to its gradient:</p>
+<pre><code>W ← W - lr * dW</code></pre>
+<p>One complete training epoch = forward pass → loss → backward pass → weight update:</p>
+<pre><code class="language-python">def train_epoch(X, Y, W1, b1, W2, b2, lr):
+    N = len(X)
+    # --- Forward ---
+    z1 = X @ W1 + b1
+    a1 = relu(z1)
+    z2 = a1 @ W2 + b2
+    probs = softmax(z2)
+
+    # --- Loss ---
+    loss = -np.log(probs[np.arange(N), Y.argmax(axis=1)] + 1e-12).mean()
+
+    # --- Backward ---
+    dz2 = (probs - Y) / N                    # gradient of loss w.r.t. z2
+    dW2 = a1.T @ dz2                         # (64, 10)
+    db2 = dz2.sum(axis=0)                    # (10,)
+
+    da1 = dz2 @ W2.T                         # (1000, 64)
+    dz1 = da1 * (z1 &gt; 0)                     # ReLU derivative
+    dW1 = X.T @ dz1                          # (784, 64)
+    db1 = dz1.sum(axis=0)                    # (64,)
+
+    # --- Update ---
+    W2 -= lr * dW2
+    b2 -= lr * db2
+    W1 -= lr * dW1
+    b1 -= lr * db1
+    return loss, probs
+
+# Train for 200 epochs, recording accuracy each epoch
+losses, accuracies = [], []
+for epoch in range(200):
+    loss, probs = train_epoch(X, Y, W1, b1, W2, b2, lr=0.1)
+    losses.append(loss)
+    accuracies.append((probs.argmax(axis=1) == y).mean())
+
+print(f&quot;Epoch   0: loss={losses[0]:.4f}  acc={accuracies[0]:.4f}&quot;)
+print(f&quot;Epoch  49: loss={losses[49]:.4f}  acc={accuracies[49]:.4f}&quot;)
+print(f&quot;Epoch 199: loss={losses[199]:.4f}  acc={accuracies[199]:.4f}&quot;)
+
+plt.figure(figsize=(10, 4))
+plt.subplot(1, 2, 1)
+plt.plot(losses)
+plt.title(&quot;Cross-Entropy Loss&quot;)
+plt.xlabel(&quot;Epoch&quot;)
+plt.subplot(1, 2, 2)
+plt.plot(accuracies)
+plt.title(&quot;Training Accuracy&quot;)
+plt.xlabel(&quot;Epoch&quot;)
+plt.tight_layout()
+plt.savefig(&quot;mnist_training_curve.png&quot;, dpi=100)
+from IPython.display import display
+display(plt.gcf())
+print(&quot;Saved mnist_training_curve.png&quot;)</code></pre>
+<p><strong>What to notice:</strong></p>
+<ol>
+<li>Loss drops from ~2.38 (≈ -log(0.1), random) to ~0.30 — the network is becoming confident and correct.</li>
+<li>Accuracy climbs from ~0.06 to ~0.94 — a from-scratch numpy net reaches ~94% on MNIST.</li>
+<li>The curve is steepest in the first ~25 epochs, then flattens — most learning happens early.</li>
+</ol>
+<blockquote><strong>Pitfall:</strong> Using a learning rate that is too large (e.g., 1.0) causes the loss to oscillate or diverge to NaN. Too small (e.g., 0.001) and 200 epochs won't be enough. 0.1 is a sweet spot for this setup.</blockquote>
+<hr/>
+<h2>Exercises (do these!)</h2>
+<p>Do not modify the validation function. Write your code in the exercise cells, run those cells to verify, then run the validation cell. It checks the logic of your function against small cases. A different implementation is fine. It does not require the same lines of code or an exact number. If a check fails, the lab page says what is wrong and what to change. It does not give the answer.</p>
+<h3>Exercise 1 — 200-epoch training curve</h3>
+<p>Run the training loop and plot both loss and accuracy over 200 epochs. Report the final accuracy and the epoch where accuracy first exceeds 0.90.</p>
+<p><strong>Follow-up:</strong> Return the cross-entropy loss after the first training epoch. Do not return the accuracy, and do not return the loss from a later epoch.</p>
+<details><summary>Hint</summary>
+<p>The loss list is appended once per epoch. The first entry is the loss after epoch 1, not the accuracy curve.</p>
+</details>
+<h3>Exercise 2 — Eights predicted as threes</h3>
+<p>After training, count images whose true digit is 8 and whose predicted digit is 3.</p>
+<p><strong>Follow-up:</strong> Count images whose true digit is 8 and whose predicted digit is 3. Return that count. Do not count eights labeled as another digit, or other digits labeled as 3.</p>
+<details><summary>Hint</summary>
+<p><code>pred = probs.argmax(axis=1)</code>, then <code>int(((y == 8) &amp; (pred == 3)).sum())</code>.</p>
+</details>
+<hr/>
+<h3>What to learn next</h3>
+<ul>
+<li>Add a validation split and implement early stopping to prevent overfitting.</li>
+<li>Implement mini-batch gradient descent (update weights every 32 samples instead of the full batch).</li>
+<li>Add a second hidden layer and observe how depth changes the learning curve.</li>
+<li>Move to sklearn's <code>MLPClassifier</code> and compare its accuracy to your from-scratch net.</li>
+<li>Explore convolutional layers (CNNs), which exploit spatial structure in images and reach &gt;99% on MNIST.</li>
+</ul>
+<p><em>Files in this folder: mnist_train.csv.</em></p>
+
+<footer>Kongu AI Academy · Course 2 — Classical Machine Learning · Lesson for Lab 07 · Executable notebook: <code>lab-07-neural-net-mnist.ipynb</code></footer>
+</body>
+</html>

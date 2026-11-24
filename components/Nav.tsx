@@ -17,7 +17,8 @@ export default async function Nav() {
           Kongu AI Academy
         </Link>
         <ul className="ml-auto flex flex-wrap items-center gap-x-5 gap-y-1 text-[15px] font-medium">
-          <li><Link href="/labs" className="hover:underline">Labs</Link></li>
+          <li><Link href="/courses" className="hover:underline">Course labs</Link></li>
+          <li><Link href="/labs" className="hover:underline">Lab tracks</Link></li>
           <li><Link href="/programmes" className="hover:underline">Programmes</Link></li>
           <li><Link href="/verify" className="hover:underline">Verify certificate</Link></li>
           {user ? (

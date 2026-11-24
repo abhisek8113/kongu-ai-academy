@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_blank">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Lab 05 — Credit Risk — German Credit</title>
+<style>
+body { font-family: Georgia, 'Times New Roman', serif; max-width: 46rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #111; }
+h1, h2, h3, h4, h5, h6 { font-family: system-ui, -apple-system, sans-serif; line-height: 1.25; }
+h1 { font-size: 1.75rem; border-bottom: 2px solid #222; padding-bottom: 0.3rem; }
+h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 1px solid #bbb; padding-bottom: 0.2rem; }
+h3 { font-size: 1.1rem; margin-top: 1.4rem; }
+h4 { font-size: 1rem; margin-top: 1.1rem; color: #222; }
+code, pre { font-family: ui-monospace, Consolas, 'Courier New', monospace; font-size: 0.9em; }
+code { background: #f2f2f2; padding: 0.1em 0.3em; border-radius: 3px; }
+pre { background: #f6f6f6; border: 1px solid #ddd; padding: 0.85rem 1rem; overflow-x: auto; border-radius: 4px; }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid #888; margin: 1rem 0; padding: 0.4rem 0 0.4rem 1rem; color: #333; background: #fafafa; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-family: system-ui, sans-serif; font-size: 0.92rem; }
+th, td { border: 1px solid #ccc; padding: 0.4rem 0.55rem; text-align: left; }
+th { background: #eee; }
+.meta { font-family: system-ui, sans-serif; font-size: 0.95rem; background: #f0f4f8; border: 1px solid #ccd; padding: 0.75rem 1rem; border-radius: 4px; }
+.meta strong { display: inline-block; min-width: 7rem; }
+hr { border: none; border-top: 1px solid #ccc; margin: 1.5rem 0; }
+.colab { font-family: system-ui, sans-serif; font-size: 0.92rem; background: #e8f5e9; border: 1px solid #a5d6a7; padding: 0.75rem 1rem; border-radius: 4px; }
+.colab ol { margin: 0.4rem 0; padding-left: 1.2rem; }
+.colab img { max-width: 100%; height: auto; display: block; margin: 0.3rem 0; }
+details { margin: 0.6rem 0; padding: 0.5rem 0.75rem; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; }
+details summary { cursor: pointer; font-family: system-ui, sans-serif; font-weight: 600; }
+details p { margin: 0.4rem 0 0; }
+.next { font-family: system-ui, sans-serif; font-size: 0.95rem; background: #fff8e1; border: 1px solid #ffe082; padding: 0.75rem 1rem; border-radius: 4px; }
+footer { font-family: system-ui, sans-serif; font-size: 0.85rem; color: #555; margin-top: 2.5rem; border-top: 1px solid #ccc; padding-top: 0.75rem; }
+</style>
+</head>
+<body>
+<h1>Lab 05 — Credit Risk — German Credit</h1>
+<div class="meta">
+<p><strong>Track</strong> Classification Track</p>
+<p><strong>Level</strong> Intermediate · <strong>Time</strong> ~60 min · <strong>Env</strong> 🟢 Colab only</p>
+<p><strong>Executable lab</strong> open <code>lab-05-credit-risk-german.ipynb</code> in this folder</p>
+</div>
+
+
+
+<h2>Learning goals</h2>
+<ul><li>Preprocess mixed categorical/numeric credit data</li><li>Handle class imbalance with class_weight</li><li>Evaluate with ROC-AUC</li><li>Rank features via permutation importance</li></ul>
+
+<hr/>
+<h2>Intermediate: The Loan Officer's Scorecard</h2>
+<blockquote><strong>Scenario:</strong> You are the data scientist at a regional bank. The loan team wants a model that flags which applicants are likely to default, so a human officer can review risky cases before approving. You have 5,000 past applications with 21 features — a mix of numbers (loan amount, age, duration) and categories (checking account status, credit history, job). Only about 1 in 3 applicants is risky, so a lazy model that says "no risk" for everyone still looks decent. Your job is to build a model the bank can actually trust. <strong>You will learn:</strong> how to preprocess mixed categorical/numeric data with a ColumnTransformer, why class imbalance demands <code>class_weight</code>, how ROC-AUC measures ranking quality, and how to pick a decision threshold that matches business costs. <strong>Time:</strong> ~60 minutes. <strong>Level:</strong> Intermediate. <strong>Needs:</strong> pandas + sklearn. <strong>Env:</strong> 🟢 Colab only.</blockquote>
+<h3>Mental map</h3>
+<table><thead><tr><th>Concept</th><th>One-line idea</th><th>Where it shows up</th></tr></thead><tbody>
+<tr><td>ColumnTransformer</td><td>Apply different preprocessing to different columns</td><td>OneHotEncoder for categories, StandardScaler for numbers</td></tr>
+<tr><td>Class imbalance</td><td>Risky applicants are the minority (~33%)</td><td><code>class_weight="balanced"</code></td></tr>
+<tr><td>ROC-AUC</td><td>How well the model ranks risky above safe</td><td>0.5 = coin flip, 1.0 = perfect ranking</td></tr>
+<tr><td>Decision threshold</td><td>The score cutoff for "approve" vs "review"</td><td>Default 0.5 is rarely optimal</td></tr>
+<tr><td>Permutation importance</td><td>Which features actually drive the model</td><td>Shuffle one column, watch AUC drop</td></tr>
+</tbody></table>
+<hr/>
+<h2>1. Preprocessing mixed data: one transformer to rule them all</h2>
+<p>Credit risk modelling is where machine learning meets real money. When a bank approves a loan, it is betting that the borrower will repay. Get it right, and the bank earns interest. Get it wrong, and the bank loses the principal. A good credit risk model is worth millions — and a bad one can sink a bank.</p>
+<p>The German Credit dataset is a classic benchmark. It contains 5,000 past loan applications, each described by 21 features: checking account status, loan duration, credit history, loan purpose, loan amount, savings, employment duration, installment percentage, personal status, age, and more. The target is binary: "Risk" (bad credit) or "No Risk" (good credit). About 33% of applicants are classified as risky — a significant minority that a lazy model could ignore.</p>
+<p>The challenge is that the features are a mix of types. Seven are numeric (loan amount, age, duration), and 13 are categorical (checking status, credit history, job type). Machine learning models need numbers, so we must encode the categories. But we cannot just convert them to arbitrary numbers — "less_0" is not "less than" 0_to_200 in any meaningful numeric sense. We need <strong>one-hot encoding</strong>: each category becomes its own binary column.</p>
+<p>The clean way to handle mixed data is a <strong>ColumnTransformer</strong>. It applies different preprocessing to different columns: one-hot encode the categories, standard-scale the numbers, and pass everything to the model as a single matrix. This is more maintainable than manual encoding, and it ensures the same transformations are applied consistently at training and prediction time.</p>
+<p>We also use <code>stratify=y</code> in the train/test split to preserve the 33% risk rate in both sets. With imbalanced data, an unstratified split might produce a test set with 40% risk or 25% risk by chance, making our metrics unreliable.</p>
+<p>Let us build the preprocessing pipeline and fit a first model.</p>
+<pre><code class="language-python">import matplotlib
+import pandas as pd, numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+
+df = pd.read_csv(r&quot;german_credit_data.csv&quot;)
+df = df.drop(columns=[&quot;CustomerID&quot;])
+
+y = (df[&quot;Risk&quot;] == &quot;Risk&quot;).astype(int)
+X = df.drop(columns=[&quot;Risk&quot;])
+
+cat_cols = X.select_dtypes(&quot;object&quot;).columns.tolist()
+num_cols = X.select_dtypes(&quot;number&quot;).columns.tolist()
+print(f&quot;{len(cat_cols)} categorical, {len(num_cols)} numeric features&quot;)
+
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+print(f&quot;train: {len(X_tr)} rows, test: {len(X_te)} rows&quot;)
+print(f&quot;risk rate — train: {y_tr.mean():.4f}, test: {y_te.mean():.4f}&quot;)
+
+pre = ColumnTransformer([
+    (&quot;cat&quot;, OneHotEncoder(handle_unknown=&quot;ignore&quot;), cat_cols),
+    (&quot;num&quot;, StandardScaler(), num_cols),
+])
+clf = make_pipeline(pre, LogisticRegression(max_iter=1000, random_state=42))
+clf.fit(X_tr, y_tr)
+print(&quot;model trained OK&quot;)</code></pre>
+<p><strong>What to notice:</strong></p>
+<ol>
+<li><code>stratify=y</code> keeps the ~33% risk rate identical in train and test — essential with imbalanced data.</li>
+<li><code>handle_unknown="ignore"</code> lets the model survive a category at test time that never appeared in training.</li>
+<li>The pipeline bundles preprocessing + model, so <code>clf.predict(X_te)</code> applies the same transformations automatically.</li>
+</ol>
+<blockquote><strong>Pitfall:</strong> Never fit the encoder or scaler on the full dataset before splitting — statistics from the test set would leak into training. Fitting inside a pipeline (as here) avoids this.</blockquote>
+<hr/>
+<h2>2. Class imbalance: don't let the majority win</h2>
+<p>With 66.6% "No Risk", a model that always predicts "No Risk" scores 66.6% accuracy and is useless. Two honest fixes: use a metric that sees through the class ratio (ROC-AUC, next section), and tell the model to care more about the minority class with <code>class_weight="balanced"</code>.</p>
+<p>Class imbalance is one of the most common challenges in real-world machine learning. Fraud detection, disease screening, churn prediction, spam filtering — all involve rare positive cases buried in a sea of negatives. The danger is that the model learns to ignore the minority class entirely: if 97% of transactions are legitimate, a model that always says "legitimate" is 97% accurate and worthless.</p>
+<p>The <code>class_weight="balanced"</code> parameter tells sklearn to adjust the importance of each class inversely to its frequency. Risky applicants (33%) get a weight of about 2, while safe applicants (66.6%) get a weight of about 1. This means the model is penalised twice as much for misclassifying a risky applicant as for misclassifying a safe one. The effect is to shift the decision boundary toward the minority class, increasing the true-positive rate at the cost of more false alarms.</p>
+<p>The key insight is that <strong>accuracy is the wrong metric</strong> for imbalanced data. A model that always predicts the majority class has high accuracy but zero value. Instead, we should use metrics that focus on the minority class: precision, recall, F1, and ROC-AUC. ROC-AUC is particularly useful because it is threshold-free — it evaluates the model's ability to <em>rank</em> risky applicants above safe ones, regardless of where we set the cutoff.</p>
+<p>Let us see how class weighting affects the model's performance.</p>
+<pre><code class="language-python">import matplotlib
+import pandas as pd, numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import roc_auc_score, confusion_matrix
+
+df = pd.read_csv(r&quot;german_credit_data.csv&quot;)
+df = df.drop(columns=[&quot;CustomerID&quot;])
+y = (df[&quot;Risk&quot;] == &quot;Risk&quot;).astype(int)
+X = df.drop(columns=[&quot;Risk&quot;])
+cat_cols = X.select_dtypes(&quot;object&quot;).columns.tolist()
+num_cols = X.select_dtypes(&quot;number&quot;).columns.tolist()
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+pre = ColumnTransformer([
+    (&quot;cat&quot;, OneHotEncoder(handle_unknown=&quot;ignore&quot;), cat_cols),
+    (&quot;num&quot;, StandardScaler(), num_cols),
+])
+
+for weighted in [False, True]:
+    cw = &quot;balanced&quot; if weighted else None
+    clf = make_pipeline(pre, LogisticRegression(max_iter=1000, class_weight=cw, random_state=42))
+    clf.fit(X_tr, y_tr)
+    proba = clf.predict_proba(X_te)[:, 1]
+    auc = roc_auc_score(y_te, proba)
+    y_pred = clf.predict(X_te)
+    tn, fp, fn, tp = confusion_matrix(y_te, y_pred).ravel()
+    tpr = tp / (tp + fn)
+    acc = (tp + tn) / len(y_te)
+    print(f&quot;class_weight={str(cw):8s}  AUC={auc:.4f}  TPR={tpr:.4f}  accuracy={acc:.4f}&quot;)</code></pre>
+<p><strong>What to notice:</strong></p>
+<ol>
+<li><code>class_weight="balanced"</code> boosts the true-positive rate (catches more risky applicants) at the cost of more false alarms.</li>
+<li>ROC-AUC barely moves — it measures <em>ranking</em>, which the weighting doesn't change much. Accuracy moves more.</li>
+<li>The trade-off is the whole game: catching more risk means reviewing more safe applicants.</li>
+</ol>
+<blockquote><strong>Pitfall:</strong> Accuracy is the wrong target here. An 80%-accurate model that misses half the defaulters is worse for the bank than a 75%-accurate model that catches most of them.</blockquote>
+<hr/>
+<h2>3. ROC-AUC and choosing a threshold</h2>
+<p>ROC-AUC asks: "if I pick one risky and one safe applicant at random, how often does the model score the risky one higher?" It is threshold-free — it evaluates the ranking, not any single cutoff. The cutoff (threshold) is a separate business decision: lower it to catch more risk, higher it to reduce false alarms.</p>
+<p>The ROC curve is a plot of the true-positive rate (TPR) against the false-positive rate (FPR) at every possible threshold. A perfect model has a curve that goes straight up to (0, 1) — it catches all risky applicants with zero false alarms. A random model has a diagonal line from (0, 0) to (1, 1) — it catches risky applicants at the same rate as safe ones. The area under the curve (AUC) summarises this in a single number: 1.0 is perfect, 0.5 is random.</p>
+<p>An AUC of 0.87 means the model ranks a random risky applicant above a random safe one about 87% of the time. That is strong performance for credit risk — human loan officers typically achieve AUCs of 0.70-0.80 on the same task.</p>
+<p>But AUC does not tell you where to set the threshold. That is a business decision. If the bank's cost of a false alarm (reviewing a safe applicant) is low compared to the cost of a missed default, set a low threshold to catch more risk. If false alarms are expensive, set a high threshold. <strong>Youden's J statistic</strong> (TPR − FPR) provides a data-driven starting point: it finds the threshold that maximises the difference between true positives and false positives.</p>
+<p>Let us compute the ROC curve, find the optimal threshold, and see how the trade-off looks.</p>
+<pre><code class="language-python">import matplotlib
+import pandas as pd, numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import roc_auc_score, roc_curve, confusion_matrix
+
+df = pd.read_csv(r&quot;german_credit_data.csv&quot;)
+df = df.drop(columns=[&quot;CustomerID&quot;])
+y = (df[&quot;Risk&quot;] == &quot;Risk&quot;).astype(int)
+X = df.drop(columns=[&quot;Risk&quot;])
+cat_cols = X.select_dtypes(&quot;object&quot;).columns.tolist()
+num_cols = X.select_dtypes(&quot;number&quot;).columns.tolist()
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+pre = ColumnTransformer([
+    (&quot;cat&quot;, OneHotEncoder(handle_unknown=&quot;ignore&quot;), cat_cols),
+    (&quot;num&quot;, StandardScaler(), num_cols),
+])
+clf = make_pipeline(pre, LogisticRegression(max_iter=1000, class_weight=&quot;balanced&quot;, random_state=42))
+clf.fit(X_tr, y_tr)
+proba = clf.predict_proba(X_te)[:, 1]
+print(f&quot;ROC-AUC: {roc_auc_score(y_te, proba):.4f}&quot;)
+
+print(&quot;\nthreshold sweep (balanced model):&quot;)
+for t in [0.3, 0.4, 0.5, 0.6, 0.7]:
+    yp = (proba &gt;= t).astype(int)
+    tn, fp, fn, tp = confusion_matrix(y_te, yp).ravel()
+    print(f&quot;  t={t}: TPR={tp/(tp+fn):.4f}  FPR={fp/(fp+tn):.4f}  precision={tp/(tp+fp):.4f}&quot;)
+
+fpr, tpr, thr = roc_curve(y_te, proba)
+best_t = thr[np.argmax(tpr - fpr)]
+print(f&quot;\nYouden&#x27;s J best threshold: {best_t:.4f} (TPR={tpr[np.argmax(tpr-fpr)]:.4f}, FPR={fpr[np.argmax(tpr-fpr)]:.4f})&quot;)
+
+plt.figure(figsize=(6, 5))
+plt.plot(fpr, tpr, label=f&quot;ROC curve (AUC = {roc_auc_score(y_te, proba):.3f})&quot;)
+plt.plot([0, 1], [0, 1], &quot;k--&quot;, label=&quot;coin flip&quot;)
+plt.xlabel(&quot;False positive rate&quot;)
+plt.ylabel(&quot;True positive rate&quot;)
+plt.title(&quot;ROC curve — credit risk model&quot;)
+plt.legend()
+plt.grid(alpha=0.3)
+plt.savefig(&quot;roc_curve.png&quot;, dpi=100, bbox_inches=&quot;tight&quot;)
+from IPython.display import display
+display(plt.gcf())</code></pre>
+<p><strong>What to notice:</strong></p>
+<ol>
+<li>AUC ≈ 0.87 means the model ranks a random risky applicant above a random safe one about 87% of the time.</li>
+<li>Lowering the threshold from 0.7 → 0.3 raises TPR (0.60 → 0.91) but also FPR (0.09 → 0.42).</li>
+<li>Youden's J (TPR − FPR) picks the threshold that best balances the two — here ≈ 0.37, well below the default 0.5.</li>
+</ol>
+<blockquote><strong>Pitfall:</strong> The "best" threshold depends on business costs. If missing a default costs 5× a false alarm, pick a lower threshold than Youden's J suggests. There is no universally correct cutoff.</blockquote>
+<hr/>
+<h2>Exercises (do these!)</h2>
+<p>Do not modify the validation function. Write your code in the exercise cells, run those cells to verify, then run the validation cell. It checks the logic of your function against small cases. A different implementation is fine. It does not require the same lines of code or an exact number. If a check fails, the lab page says what is wrong and what to change. It does not give the answer.</p>
+<h3>Exercise 1 — Risk rate by checking status</h3>
+<p>Group the full dataset by <code>CheckingStatus</code> and compute the risk rate (fraction with <code>Risk == "Risk"</code>) for each group. Which group is riskiest, and which is safest?</p>
+<p><strong>Follow-up:</strong> Across all 5,000 applicants, divide the number who are risky by 5,000. Return that overall risk rate, not the rate of one subgroup.</p>
+<details><summary>Hint</summary>
+<p><code>df.groupby("CheckingStatus")["Risk"].apply(lambda s: (s == "Risk").mean())</code> gives the per-group rate. The follow-up wants the rate over all applicants, <code>(df["Risk"] == "Risk").mean()</code>.</p>
+</details>
+<h3>Exercise 2 — ROC-AUC of the pipeline</h3>
+<p>Train the balanced logistic regression from section 3 and compute ROC-AUC on the held-out test set. Then retrain without <code>class_weight</code> and compare.</p>
+<p><strong>Follow-up:</strong> Use the balanced model at a threshold of 0.5. Return its true-positive rate: the fraction of actually risky applicants it catches. Do not return the false-positive rate.</p>
+<details><summary>Hint</summary>
+<p><code>roc_auc_score(y_te, proba)</code> where <code>proba = clf.predict_proba(X_te)[:, 1]</code>. True-positive rate is <code>tp / (tp + fn)</code> from <code>confusion_matrix</code> at threshold 0.5.</p>
+</details>
+<hr/>
+<h3>What to learn next</h3>
+<ul>
+<li>Gradient boosting (XGBoost/LightGBM) — the usual upgrade over logistic regression for tabular credit data.</li>
+<li>Calibration: making predicted probabilities match real-world frequencies.</li>
+<li>Fairness auditing — what happens when the model treats demographic groups differently (Lab 06).</li>
+</ul>
+<p><em>Files in this folder: german_credit_data.csv (5000 rows: CustomerID, CheckingStatus, LoanDuration, CreditHistory, LoanPurpose, LoanAmount, ExistingSavings, EmploymentDuration, InstallmentPercent, Sex, OthersOnLoan, CurrentResidenceDuration, OwnsProperty, Age, InstallmentPlans, Housing, ExistingCreditsCount, Job, Dependents, Telephone, ForeignWorker, Risk).</em></p>
+
+<footer>Kongu AI Academy · Course 2 — Classical Machine Learning · Lesson for Lab 05 · Executable notebook: <code>lab-05-credit-risk-german.ipynb</code></footer>
+</body>
+</html>

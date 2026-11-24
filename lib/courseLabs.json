@@ -1,0 +1,612 @@
+[
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-01-python-refresher-for-data-people",
+  "num": 1,
+  "title": "Python Refresher for Data People",
+  "track": "Junior Analyst Track",
+  "level": "Beginner",
+  "time": "~45 min",
+  "goals": [
+   "Map Excel columns/rows/sheets to Python lists, dicts, and lists-of-dicts",
+   "Clean messy text and numbers with strip/title and None handling",
+   "Build reusable cleaning functions and comprehensions",
+   "Answer revenue-by-region from a 12-row messy sales sheet"
+  ],
+  "notebook": "lab-01-python-refresher-for-data-people.ipynb",
+  "datasets": [
+   "sales_spreadsheet.csv"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-01-python-refresher-for-data-people",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-01-python-refresher-for-data-people/lab-01-python-refresher-for-data-people.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-02-sensor-time-series-pure-python",
+  "num": 2,
+  "title": "Sensor Time Series with Pure Python",
+  "track": "Data Wrangling Track",
+  "level": "Beginner",
+  "time": "~45 min",
+  "goals": [
+   "Load CSV time series with csv.DictReader and datetime.date",
+   "Aggregate monthly means with defaultdict(list)",
+   "Find hottest/coldest days and consecutive cold streaks",
+   "Flag anomalies with |z| > 2"
+  ],
+  "notebook": "lab-02-sensor-time-series-pure-python.ipynb",
+  "datasets": [
+   "daily-min-temperatures.csv"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-02-sensor-time-series-pure-python",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-02-sensor-time-series-pure-python/lab-02-sensor-time-series-pure-python.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-03-messy-retail-cleanup",
+  "num": 3,
+  "title": "Messy Retail Cleanup Pipeline",
+  "track": "Data Quality Track",
+  "level": "Beginner–Intermediate",
+  "time": "~60 min",
+  "goals": [
+   "Profile a dirty 1000-row inventory export before cleaning",
+   "Parse word-numbers ('two hundred') and reject NaN prices",
+   "Validate Status against an allowed set with a flag column",
+   "Compute stock value by Category and export warehouse_clean.csv"
+  ],
+  "notebook": "lab-03-messy-retail-cleanup.ipynb",
+  "datasets": [
+   "warehouse_clean.csv",
+   "warehouse_messy_data.csv"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-03-messy-retail-cleanup",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-03-messy-retail-cleanup/lab-03-messy-retail-cleanup.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-04-eda-advertising",
+  "num": 4,
+  "title": "EDA — TV, Radio, Newspaper vs Sales",
+  "track": "First Real EDA Track",
+  "level": "Beginner",
+  "time": "~45 min",
+  "goals": [
+   "Load data with pandas and summarise with describe()",
+   "Compute and interpret a correlation matrix",
+   "Create scatter plots and quartile-binned means",
+   "Write a 5-bullet findings memo with design caveats"
+  ],
+  "notebook": "lab-04-eda-advertising.ipynb",
+  "datasets": [
+   "Advertising.csv",
+   "eda_findings.md"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-04-eda-advertising",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-04-eda-advertising/lab-04-eda-advertising.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-05-ab-test-analysis",
+  "num": 5,
+  "title": "A/B Test Analysis — Old vs New Page",
+  "track": "Experimentation Basics Track",
+  "level": "Intermediate",
+  "time": "~50 min",
+  "goals": [
+   "Compute conversion rates by experiment group",
+   "Run a two-proportion z-test and interpret p-value",
+   "Build a 95% CI for the conversion difference",
+   "Estimate MDE at 80% power and make a ship decision"
+  ],
+  "notebook": "lab-05-ab-test-analysis.ipynb",
+  "datasets": [
+   "ab_test.csv"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-05-ab-test-analysis",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-05-ab-test-analysis/lab-05-ab-test-analysis.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-06-naive-bayes-sms-spam",
+  "num": 6,
+  "title": "SMS Spam Classifier (Naive Bayes, no sklearn)",
+  "track": "Probability Meets Text Track",
+  "level": "Intermediate",
+  "time": "~60 min",
+  "goals": [
+   "Tokenise SMS text and remove stopwords",
+   "Train multinomial Naive Bayes with Laplace smoothing from scratch",
+   "Evaluate on a seed=42 holdout with a confusion matrix",
+   "Rank spam-indicative tokens by log-likelihood ratio"
+  ],
+  "notebook": "lab-06-naive-bayes-sms-spam.ipynb",
+  "datasets": [
+   "sms.tsv"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-06-naive-bayes-sms-spam",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-06-naive-bayes-sms-spam/lab-06-naive-bayes-sms-spam.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-07-iris-deep-dive",
+  "num": 7,
+  "title": "Iris Deep-Dive — Stats + First Plot",
+  "track": "Statistics for Analysts Track",
+  "level": "Beginner",
+  "time": "~40 min",
+  "goals": [
+   "Compute per-species means and standard deviations",
+   "Measure class separation with Cohen's d",
+   "Run one-way ANOVA and a t-based 95% confidence interval",
+   "Publish a pair-plot (seaborn or matplotlib fallback)"
+  ],
+  "notebook": "lab-07-iris-deep-dive.ipynb",
+  "datasets": [
+   "iris.csv"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-07-iris-deep-dive",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-07-iris-deep-dive/lab-07-iris-deep-dive.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-08-live-public-api",
+  "num": 8,
+  "title": "Working with a Live Public API",
+  "track": "Data Outside Files Track",
+  "level": "Intermediate",
+  "time": "~40 min",
+  "goals": [
+   "GET JSON from a public API with urllib and a User-Agent",
+   "Retry 429/5xx with exponential backoff",
+   "Cache responses and flatten nested JSON to rows",
+   "Save api_snapshot.csv; fall back to offline fixture"
+  ],
+  "notebook": "lab-08-live-public-api.ipynb",
+  "datasets": [
+   "api_cache.json",
+   "api_snapshot.csv",
+   "offline_fixture.json"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-08-live-public-api",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-08-live-public-api/lab-08-live-public-api.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-09-chinook-sqlite",
+  "num": 9,
+  "title": "Relational Queries — Chinook Music DB",
+  "track": "SQL for Analysts Track",
+  "level": "Beginner–Intermediate",
+  "time": "~50 min",
+  "goals": [
+   "Connect to SQLite and list schema tables",
+   "Write JOIN + GROUP BY revenue queries",
+   "Use LEFT JOIN anti-patterns to find orphan rows",
+   "Load SQL results into pandas and plot monthly revenue"
+  ],
+  "notebook": "lab-09-chinook-sqlite.ipynb",
+  "datasets": [
+   "chinook.sqlite",
+   "top_tracks.csv"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-09-chinook-sqlite",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-09-chinook-sqlite/lab-09-chinook-sqlite.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-10-web-scraping-static-page",
+  "num": 10,
+  "title": "Web Scraping a Static Public Page",
+  "track": "Data Acquisition Track",
+  "level": "Intermediate",
+  "time": "~45 min",
+  "goals": [
+   "Parse an HTML table with html.parser (BeautifulSoup optional)",
+   "Normalise rows to dicts and handle missing cells",
+   "Export scraped.csv with a row-count assertion",
+   "Practice polite scraping rules and robots.txt awareness"
+  ],
+  "notebook": "lab-10-web-scraping-static-page.ipynb",
+  "datasets": [
+   "fixture.html",
+   "scraped.csv"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-10-web-scraping-static-page",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-10-web-scraping-static-page/lab-10-web-scraping-static-page.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-11-visualisation-studio",
+  "num": 11,
+  "title": "Visualisation Studio",
+  "track": "Charts That Communicate Track",
+  "level": "Beginner",
+  "time": "~45 min",
+  "goals": [
+   "Choose appropriate charts for distribution and composition questions",
+   "Redact PII (emails) before any plot leaves your machine",
+   "Produce four annotated publication-quality figures",
+   "Read tip% and ticket-status insights from the charts"
+  ],
+  "notebook": "lab-11-visualisation-studio.ipynb",
+  "datasets": [
+   "tickets.csv",
+   "tips.csv"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-11-visualisation-studio",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-11-visualisation-studio/lab-11-visualisation-studio.ipynb"
+ },
+ {
+  "course": "python-data-foundations",
+  "courseName": "Python & Data Foundations",
+  "color": "#2f6f4f",
+  "folder": "course-01-foundations-python-math-data",
+  "lab": "lab-12-hr-attrition-capstone",
+  "num": 12,
+  "title": "HR Attrition Mini Case Study",
+  "track": "Course Capstone Track",
+  "level": "Intermediate Capstone",
+  "time": "~75 min",
+  "goals": [
+   "Compute overall attrition and slice by Department / OverTime",
+   "Bin income into quartiles and compare attrition rates",
+   "Spot confounders and non-monotonic signals",
+   "Write 3 actionable hypotheses into attrition_report.md"
+  ],
+  "notebook": "lab-12-hr-attrition-capstone.ipynb",
+  "datasets": [
+   "HR-Employee-Attrition-synth.csv",
+   "attrition_report.md",
+   "emp_attrition.csv"
+  ],
+  "base": "/course-labs/course-01-foundations-python-math-data/lab-12-hr-attrition-capstone",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-01-foundations-python-math-data/lab-12-hr-attrition-capstone/lab-12-hr-attrition-capstone.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-01-linear-regression-salary",
+  "num": 1,
+  "title": "Linear Regression — Salary vs Experience",
+  "track": "Regression Track",
+  "level": "Beginner",
+  "time": "~40 min",
+  "goals": [
+   "Fit simple OLS with sklearn LinearRegression",
+   "Interpret slope and intercept in business terms",
+   "Evaluate with R² and residual plots",
+   "Predict salary at unseen experience values"
+  ],
+  "notebook": "lab-01-linear-regression-salary.ipynb",
+  "datasets": [
+   "Salary_Data.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-01-linear-regression-salary",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-01-linear-regression-salary/lab-01-linear-regression-salary.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-02-housing-price-regression",
+  "num": 2,
+  "title": "Housing Price Regression — Full Workflow",
+  "track": "Regression Track",
+  "level": "Intermediate",
+  "time": "~75 min",
+  "goals": [
+   "Preprocess mixed numeric/categorical features",
+   "Compare LinearRegression vs RandomForest",
+   "Use cross-validation for honest evaluation",
+   "Read feature importance for model insight"
+  ],
+  "notebook": "lab-02-housing-price-regression.ipynb",
+  "datasets": [
+   "housing.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-02-housing-price-regression",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-02-housing-price-regression/lab-02-housing-price-regression.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-03-logistic-regression-churn",
+  "num": 3,
+  "title": "Logistic Regression — Telco Churn",
+  "track": "Classification Track",
+  "level": "Intermediate",
+  "time": "~60 min",
+  "goals": [
+   "Build a binary classifier with logistic regression",
+   "Encode categoricals and handle blank TotalCharges",
+   "Tune decision threshold for precision/recall trade-off",
+   "Read coefficients as log-odds for interpretability"
+  ],
+  "notebook": "lab-03-logistic-regression-churn.ipynb",
+  "datasets": [
+   "Telco-Customer-Churn.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-03-logistic-regression-churn",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-03-logistic-regression-churn/lab-03-logistic-regression-churn.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-04-knn-iris",
+  "num": 4,
+  "title": "K-Nearest Neighbors on Iris",
+  "track": "Classification Track",
+  "level": "Beginner",
+  "time": "~40 min",
+  "goals": [
+   "Understand distance-based classification",
+   "Scale features before KNN",
+   "Select k via cross-validation",
+   "Classify a hand-entered flower"
+  ],
+  "notebook": "lab-04-knn-iris.ipynb",
+  "datasets": [
+   "iris.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-04-knn-iris",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-04-knn-iris/lab-04-knn-iris.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-05-credit-risk-german",
+  "num": 5,
+  "title": "Credit Risk — German Credit",
+  "track": "Classification Track",
+  "level": "Intermediate",
+  "time": "~60 min",
+  "goals": [
+   "Preprocess mixed categorical/numeric credit data",
+   "Handle class imbalance with class_weight",
+   "Evaluate with ROC-AUC",
+   "Rank features via permutation importance"
+  ],
+  "notebook": "lab-05-credit-risk-german.ipynb",
+  "datasets": [
+   "german_credit_data.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-05-credit-risk-german",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-05-credit-risk-german/lab-05-credit-risk-german.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-06-credit-fairness-preview",
+  "num": 6,
+  "title": "Credit Risk + Fairness Basics",
+  "track": "Responsible ML Track",
+  "level": "Intermediate",
+  "time": "~50 min",
+  "goals": [
+   "Compute group-wise accuracy and TPR",
+   "Calculate disparate impact ratio",
+   "Understand why equal accuracy ≠ fair",
+   "Sketch a reweighing mitigation"
+  ],
+  "notebook": "lab-06-credit-fairness-preview.ipynb",
+  "datasets": [
+   "german_credit_prepared.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-06-credit-fairness-preview",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-06-credit-fairness-preview/lab-06-credit-fairness-preview.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-07-neural-net-mnist",
+  "num": 7,
+  "title": "Neural Net from Scratch — MNIST",
+  "track": "Deep Learning Track",
+  "level": "Intermediate–Advanced",
+  "time": "~75 min",
+  "goals": [
+   "Build a feed-forward MLP with numpy only",
+   "Implement forward pass, ReLU, softmax, cross-entropy",
+   "Train with one epoch loop and plot accuracy curve",
+   "Compare learning rates and inspect confusion"
+  ],
+  "notebook": "lab-07-neural-net-mnist.ipynb",
+  "datasets": [
+   "mnist_train.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-07-neural-net-mnist",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-07-neural-net-mnist/lab-07-neural-net-mnist.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-08-kmeans-mall-segments",
+  "num": 8,
+  "title": "Customer Segments — Mall K-Means",
+  "track": "Unsupervised Track",
+  "level": "Intermediate",
+  "time": "~50 min",
+  "goals": [
+   "Apply K-Means clustering to customer data",
+   "Use elbow method and silhouette score",
+   "Standardise features before clustering",
+   "Interpret centroids as marketing personas"
+  ],
+  "notebook": "lab-08-kmeans-mall-segments.ipynb",
+  "datasets": [
+   "Mall_Customers.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-08-kmeans-mall-segments",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-08-kmeans-mall-segments/lab-08-kmeans-mall-segments.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-09-market-basket-groceries",
+  "num": 9,
+  "title": "Market Basket — Groceries",
+  "track": "Unsupervised Track",
+  "level": "Intermediate",
+  "time": "~60 min",
+  "goals": [
+   "Encode transactions for association rules",
+   "Compute support, confidence, and lift",
+   "Generate Apriori-style candidate itemsets",
+   "Filter rules by lift > 2"
+  ],
+  "notebook": "lab-09-market-basket-groceries.ipynb",
+  "datasets": [
+   "groceries.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-09-market-basket-groceries",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-09-market-basket-groceries/lab-09-market-basket-groceries.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-10-gradient-boosting-gapminder",
+  "num": 10,
+  "title": "Gradient Boosting — Life Expectancy Bands",
+  "track": "Classification Track",
+  "level": "Intermediate",
+  "time": "~55 min",
+  "goals": [
+   "Bin life expectancy into tercile bands",
+   "Train GradientBoostingClassifier",
+   "Read feature importance for global insight",
+   "Sketch partial dependence on gdpPercap"
+  ],
+  "notebook": "lab-10-gradient-boosting-gapminder.ipynb",
+  "datasets": [
+   "gapminderDataFiveYear.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-10-gradient-boosting-gapminder",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-10-gradient-boosting-gapminder/lab-10-gradient-boosting-gapminder.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-11-regularisation-ridge-lasso",
+  "num": 11,
+  "title": "Regularisation — Ridge & Lasso on Housing",
+  "track": "Regression Track",
+  "level": "Intermediate",
+  "time": "~55 min",
+  "goals": [
+   "Demonstrate overfitting with high-degree polynomials",
+   "Apply Ridge (L2) and Lasso (L1) regularisation",
+   "Select alpha via GridSearchCV",
+   "Read Lasso sparsity for feature selection"
+  ],
+  "notebook": "lab-11-regularisation-ridge-lasso.ipynb",
+  "datasets": [
+   "housing.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-11-regularisation-ridge-lasso",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-11-regularisation-ridge-lasso/lab-11-regularisation-ridge-lasso.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-12-model-selection-default",
+  "num": 12,
+  "title": "Model Selection & Metrics — Credit Default",
+  "track": "Evaluation Track",
+  "level": "Intermediate",
+  "time": "~60 min",
+  "goals": [
+   "Compute majority-class baseline accuracy",
+   "Plot ROC and PR curves for 3 models",
+   "Use k-fold CV for fair comparison",
+   "Sketch a reliability diagram for calibration"
+  ],
+  "notebook": "lab-12-model-selection-default.ipynb",
+  "datasets": [
+   "Default.csv"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-12-model-selection-default",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-12-model-selection-default/lab-12-model-selection-default.ipynb"
+ },
+ {
+  "course": "classical-ml",
+  "courseName": "Classical Machine Learning",
+  "color": "#a62a3a",
+  "folder": "course-02-classical-machine-learning",
+  "lab": "lab-13-capstone-churn-model-card",
+  "num": 13,
+  "title": "Capstone — Telco Churn End-to-End + Model Card",
+  "track": "Capstone Track",
+  "level": "Capstone",
+  "time": "~90 min",
+  "goals": [
+   "Build full pipeline: clean → encode → train → select",
+   "Compare two models with cross-validation",
+   "Write a model card with fairness slice",
+   "Produce churn_model_card.md deliverable"
+  ],
+  "notebook": "lab-13-capstone-churn-model-card.ipynb",
+  "datasets": [
+   "Telco-Customer-Churn.csv",
+   "churn_model_card.md"
+  ],
+  "base": "/course-labs/course-02-classical-machine-learning/lab-13-capstone-churn-model-card",
+  "colab": "https://colab.research.google.com/github/abhisek8113/kongu-ai-academy/blob/main/public/course-labs/course-02-classical-machine-learning/lab-13-capstone-churn-model-card/lab-13-capstone-churn-model-card.ipynb"
+ }
+]

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { tracks } from "@/lib/labs";
 import EnquiryForm from "@/components/EnquiryForm";
 import Loom from "@/components/Loom";
+import { courseLabs, courses } from "@/lib/courseLabs";
 
 const formats = [
   ["90-minute demo session", "Any department or school", "Free"],
@@ -52,6 +53,16 @@ export default function Home() {
               <span className="mt-auto text-sm font-semibold text-madder">{t.labs.length} labs →</span>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="wrap pb-16">
+        <div className="card flex flex-wrap items-center gap-6 border-2 border-madder/20">
+          <div className="flex-1">
+            <h2 className="text-2xl font-extrabold sm:text-3xl">{courseLabs.length} full course labs with Colab notebooks</h2>
+            <p className="mt-2 text-[#5d5550]">{courses.map((c) => `${c.name} (${c.labs.length} labs)`).join(" · ")}. Every lab has a lesson, a runnable notebook and a real dataset.</p>
+          </div>
+          <Link href="/courses" className="btn-red">Start a course</Link>
         </div>
       </section>
 
