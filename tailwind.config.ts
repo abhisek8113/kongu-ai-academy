@@ -1,25 +1,35 @@
 import type { Config } from "tailwindcss";
 
-// Design language: a technical lab manual.
-// White paper, black ink, hairline rules, one Kongu red signal colour, IBM Plex type.
+// Kongu AI Academy — premium dark system.
+// Token names are kept from earlier versions so every page re-themes at once:
+// ink = primary text, mute = secondary text, rule/line = borders, cream/panel = surfaces, madder = brand blue.
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        madder: { DEFAULT: "#b3261e", dark: "#8f1d17", light: "#c9372d" },
-        saffron: "#b3261e",
-        cream: "#f5f5f3",
-        ink: "#111111",
-        rule: "#d9d9d6",
-        mute: "#5f5f5b",
+        night: "#070B18",
+        deep: "#101A35",
+        panel: "#0C1328",
+        cream: "#0E1631",
+        ink: "#F7F9FF",
+        mute: "#A7B0C3",
+        rule: "#1C2543",
+        line: "#2A3560",
+        madder: { DEFAULT: "#386BFF", dark: "#2A55E0", light: "#5B86FF" },
+        saffron: "#386BFF",
+        cyan: "#00D4FF",
+        gold: "#D6B46A",
       },
       fontFamily: {
-        display: ["'IBM Plex Sans'", "system-ui", "sans-serif"],
-        sans: ["'IBM Plex Sans'", "system-ui", "sans-serif"],
-        mono: ["'IBM Plex Mono'", "ui-monospace", "monospace"],
+        display: ["Sora", "Inter", "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
+        mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
       },
-      borderRadius: { xl: "2px", "2xl": "2px", lg: "2px", full: "9999px" },
+      borderRadius: { xl: "12px", "2xl": "16px", lg: "10px" },
+      boxShadow: {
+        glow: "0 0 0 1px rgba(56,107,255,.35), 0 10px 40px -10px rgba(56,107,255,.45)",
+      },
     },
   },
   plugins: [],

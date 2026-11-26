@@ -16,8 +16,8 @@ export default function NotebookPreview() {
   const path = ks.map((k, i) => `${i ? "L" : "M"}${x(k).toFixed(1)},${y(acc[i]).toFixed(1)}`).join(" ");
   const bestAcc = acc[ks.indexOf(best)];
   return (
-    <figure className="border border-ink bg-white">
-      <div className="flex items-center justify-between border-b border-ink px-4 py-2 font-mono text-[12px]">
+    <figure className="border border-line bg-panel">
+      <div className="flex items-center justify-between border-b border-line px-4 py-2 font-mono text-[12px]">
         <span>lab-04-knn-iris.ipynb</span>
         <span className="text-mute">Google Colab</span>
       </div>

@@ -20,7 +20,7 @@ export default async function CoursePage({ params }: { params: { course: string 
   const pct = Math.round((n / c.labs.length) * 100);
   return (
     <div>
-      <header className="border-b border-ink">
+      <header className="border-b border-line">
         <div className="wrap py-12">
           <Link href="/courses" className="kicker hover:text-ink">← All courses</Link>
           <h1 className="mt-2 text-[40px] font-semibold leading-tight">{c.name}</h1>

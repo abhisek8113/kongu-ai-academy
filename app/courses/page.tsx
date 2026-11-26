@@ -13,7 +13,7 @@ export default function Courses() {
       </p>
       {courses.map((c, i) => (
         <section key={c.slug} className="mt-14">
-          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-ink pb-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-3">
             <h2 className="text-2xl"><span className="font-mono text-[15px] text-mute">{String(i + 1).padStart(2, "0")}</span> <Link href={`/courses/${c.slug}`} className="hover:text-madder">{c.name}</Link></h2>
             <span className="font-mono text-[13px] text-mute">{c.labs.length} labs</span>
           </div>

@@ -9,8 +9,8 @@ const tabs = [
 export default function LabViewer({ base }: { base: string }) {
   const [tab, setTab] = useState(tabs[0]);
   return (
-    <div className="border border-ink">
-      <div className="flex gap-6 border-b border-ink px-4" role="tablist">
+    <div className="border border-line">
+      <div className="flex gap-6 border-b border-line px-4" role="tablist">
         {tabs.map((t) => (
           <button
             key={t.key}
@@ -24,7 +24,7 @@ export default function LabViewer({ base }: { base: string }) {
         ))}
         <a href={`${base}/${tab.file}`} target="_blank" rel="noreferrer" className="ml-auto self-center font-mono text-[12px] text-mute underline hover:text-ink">Open full page</a>
       </div>
-      <iframe key={tab.key} src={`${base}/${tab.file}`} title={tab.label} className="h-[75vh] w-full bg-white" />
+      <iframe key={tab.key} src={`${base}/${tab.file}`} title={tab.label} className="h-[75vh] w-full bg-panel" />
     </div>
   );
 }

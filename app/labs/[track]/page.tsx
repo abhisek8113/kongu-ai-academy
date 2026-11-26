@@ -19,7 +19,7 @@ export default async function TrackPage({ params }: { params: { track: string } 
   const pct = Math.round((t.labs.filter((l) => done.has(l.id)).length / t.labs.length) * 100);
   return (
     <div>
-      <header className="border-b border-ink">
+      <header className="border-b border-line">
         <div className="wrap py-12">
           <Link href="/labs" className="kicker hover:text-ink">← All tracks</Link>
           <h1 className="mt-2 text-[40px] font-semibold leading-tight">{t.name}</h1>

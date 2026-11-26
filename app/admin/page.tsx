@@ -9,6 +9,7 @@ export default async function AdminOverview() {
   const twoWeeks = new Date(Date.now() - 14 * 86400000).toISOString();
   const week = new Date(Date.now() - 7 * 86400000).toISOString();
 
+  const pendingAcc = await supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending");
   const [students, activeToday, recent, last14, done7, leadsNew, pending, certs, allDone] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student"),
     supabase.from("profiles").select("id", { count: "exact", head: true }).gte("last_seen_at", day),
@@ -37,12 +38,13 @@ export default async function AdminOverview() {
   const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
 
   const kpis: [string, number | null, string][] = [
+    ["Accounts to approve", pendingAcc.count, "/admin/students?sort=pending"],
     ["Students", students.count, "/admin/students"],
     ["Active in last 24 h", activeToday.count, "/admin/activity"],
     ["Labs completed (7 days)", done7.count, "/admin/activity?group=Labs"],
     ["New leads", leadsNew.count, "/admin/leads"],
     ["Enrolments to approve", pending.count, "/admin/batches"],
-    ["Certificates issued", certs.count, "/admin/certificates"],
+
   ];
 
   return (
@@ -62,7 +64,7 @@ export default async function AdminOverview() {
 
       <section className="mt-10">
         <h2 className="text-xl">Daily active students · last 14 days</h2>
-        <div className="mt-4 grid h-36 items-end gap-1.5 border-b border-ink" style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}>
+        <div className="mt-4 grid h-36 items-end gap-1.5 border-b border-line" style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}>
           {days.map((d) => {
             const n = active.get(d)!.size;
             return (

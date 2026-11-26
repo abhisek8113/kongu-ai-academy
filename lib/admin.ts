@@ -47,6 +47,7 @@ export function describe(a: { action: string; meta: any }) {
     case "admin_batch_toggle": return `${m.open ? "reopened" : "closed"} batch ${m.batch ?? ""}`;
     case "admin_enrolment": return `set ${m.student ?? "a student"} → ${m.status}${m.batch ? ` (${m.batch})` : ""}`;
     case "admin_lead": return `marked lead ${m.lead ?? ""} → ${m.status}`;
+    case "admin_approval": return `${m.status === "approved" ? "approved" : m.status === "rejected" ? "rejected" : "reset"} ${m.student ?? "an account"}`;
     case "admin_certificate": return `issued certificate ${m.id} to ${m.recipient}`;
     default: return a.action;
   }
@@ -57,7 +58,7 @@ export const ACTION_GROUPS: Record<string, string[]> = {
   "Logins": ["login", "logout", "signup"],
   "Labs": ["lab_open", "colab_open", "lab_complete", "lab_undo"],
   "Leads & enrolment": ["enquiry", "enrol_request"],
-  "Admin actions": ["admin_batch", "admin_batch_toggle", "admin_enrolment", "admin_lead", "admin_certificate"],
+  "Admin actions": ["admin_approval", "admin_batch", "admin_batch_toggle", "admin_enrolment", "admin_lead", "admin_certificate"],
 };
 
 export const dotColor = (action: string) =>

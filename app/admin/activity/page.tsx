@@ -26,7 +26,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: { g
       </div>
       <p className="mt-2 text-mute">Every sign-up, login, lab opened, Colab launch, lab completed, demo request and admin action, newest first.</p>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-b border-ink">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-b border-line">
         <div className="flex flex-wrap gap-x-5">
           {Object.keys(ACTION_GROUPS).map((g) => (
             <Link key={g} href={"/admin/activity?" + new URLSearchParams({ group: g, ...(q ? { q } : {}) })}

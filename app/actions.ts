@@ -37,28 +37,39 @@ export async function signUp(_: unknown, f: FormData) {
     },
   });
   if (error) return { error: error.message };
-  if (!data.session) return { ok: "Account created. Check your email and click the confirmation link, then log in." };
+  if (!data.session) return { ok: "Account created. Confirm your email, then wait for Kongu AI Academy to approve your account — you'll be able to track labs and enrol once approved." };
   redirect("/dashboard");
 }
 
 export async function submitEnquiry(_: unknown, f: FormData) {
-  const name = s(f, "name"), phone = s(f, "phone"), institution = s(f, "institution");
-  if (!name || !phone || !institution) return { error: "Please fill in your name, phone and institution." };
+  // spam: honeypot filled, or submitted faster than a human could type
+  if (s(f, "website") || Date.now() - Number(s(f, "started") || 0) < 2500) return { ok: "Thank you! We'll contact you within 48 hours." };
+  const name = s(f, "name").slice(0, 80), institution = s(f, "institution").slice(0, 120);
+  const phone = s(f, "phone").replace(/[^\d+]/g, "");
+  const email = s(f, "email").slice(0, 120);
+  const fields: Record<string, string> = {};
+  if (name.length < 2) fields.name = "Please enter your name.";
+  if (!/^(\+?91)?[6-9]\d{9}$/.test(phone)) fields.phone = "Enter a valid 10-digit Indian mobile number.";
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) fields.email = "Enter a valid email address.";
+  if (institution.length < 2) fields.institution = "Please enter your college, institution or company.";
+  const participants = s(f, "participants") ? parseInt(s(f, "participants")) : null;
+  if (participants !== null && (!Number.isFinite(participants) || participants < 1 || participants > 5000)) fields.participants = "1–5000";
+  if (Object.keys(fields).length) return { error: "Please check the highlighted fields.", fields };
   const supabase = createClient();
-  const participants = parseInt(s(f, "participants")) || null;
-  const interest = s(f, "interest") || "General";
-  const { error } = await supabase.from("enquiries").insert({
-    name, phone, institution, email: s(f, "email") || null, interest, participants, message: s(f, "message") || null,
-  });
-  if (error) return { error: "Could not save your request. Please WhatsApp +91 95145 24599." };
+  const interest = s(f, "interest").slice(0, 80) || "General";
+  const date = s(f, "preferred_date");
+  const message = [date && `Preferred date: ${date}`, s(f, "message").slice(0, 1000)].filter(Boolean).join("\n") || null;
+  const { error } = await supabase.from("enquiries").insert({ name, phone, institution, email: email || null, interest, participants, message });
+  if (error) return { error: "We couldn't save your request. Please WhatsApp +91 95145 24599 — we'll book you in directly." };
   const { data: { user } } = await supabase.auth.getUser();
   await logActivity(supabase, user, "enquiry", { institution, interest, participants }, name);
   return { ok: "Thank you! We'll contact you within 48 hours to fix your free demo." };
 }
 
 export async function requestEnrolment(f: FormData) {
-  const { supabase, user } = await getUserAndProfile();
+  const { supabase, user, profile } = await getUserAndProfile();
   if (!user) redirect("/login?next=/programmes");
+  if (profile?.status !== "approved") redirect("/dashboard");
   const batch_id = Number(f.get("batch_id"));
   await supabase.from("enrolments").insert({ user_id: user.id, batch_id });
   const { data: b } = await supabase.from("batches").select("title").eq("id", batch_id).maybeSingle();
@@ -68,8 +79,9 @@ export async function requestEnrolment(f: FormData) {
 }
 
 export async function toggleLab(f: FormData) {
-  const { supabase, user } = await getUserAndProfile();
+  const { supabase, user, profile } = await getUserAndProfile();
   if (!user) redirect("/login");
+  if (profile?.status !== "approved") redirect("/dashboard");
   const lab_id = s(f, "lab_id"), path = s(f, "path"), done = s(f, "done") === "1";
   if (done) await supabase.from("lab_progress").delete().eq("user_id", user.id).eq("lab_id", lab_id);
   else await supabase.from("lab_progress").upsert({ user_id: user.id, lab_id, submission_url: s(f, "submission_url") || null });
@@ -137,4 +149,16 @@ export async function issueCertificate(f: FormData) {
   });
   await logActivity(supabase, user, "admin_certificate", { id, recipient, programme });
   revalidatePath("/admin");
+}
+
+export async function setStudentStatus(f: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const status = s(f, "status");
+  if (!["approved", "rejected", "pending"].includes(status)) return;
+  const id = s(f, "id");
+  await supabase.from("profiles").update({ status }).eq("id", id).neq("role", "admin");
+  await logActivity(supabase, user, "admin_approval", { student: s(f, "name"), status });
+  revalidatePath("/admin");
+  revalidatePath("/admin/students");
+  revalidatePath(`/admin/students/${id}`);
 }

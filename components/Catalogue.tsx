@@ -10,7 +10,7 @@ export default function Catalogue({ rows, courses }: { rows: Row[]; courses: { s
   const tabs = [{ slug: "all", name: "All labs", count: rows.length }, ...courses];
   return (
     <div>
-      <div className="flex flex-wrap gap-x-6 gap-y-2 border-b border-ink" role="tablist">
+      <div className="flex flex-wrap gap-x-6 gap-y-2 border-b border-line" role="tablist">
         {tabs.map((t) => (
           <button
             key={t.slug}

@@ -17,10 +17,11 @@ export default async function CourseLabPage({ params }: { params: { course: stri
   const prev = c.labs[idx - 1], next = c.labs[idx + 1];
   const id = `${c.slug}/${l.lab}`;
   const path = `/courses/${id}`;
-  let user: any = null, done = false;
+  let user: any = null, approved = false, done = false;
   try {
     const ctx = await getUserAndProfile();
     user = ctx.user;
+    approved = ctx.profile?.status === "approved";
     if (user) {
       const { data } = await ctx.supabase.from("lab_progress").select("lab_id").eq("user_id", user.id).eq("lab_id", id).maybeSingle();
       done = !!data;
@@ -55,7 +56,9 @@ export default async function CourseLabPage({ params }: { params: { course: stri
           )}
           <div className="card">
             <h2 className="font-bold">Your progress</h2>
-            {user ? (
+            {user && !approved ? (
+              <p className="mt-2 text-sm text-gold">Your account is awaiting approval. You can read the lesson and use the notebook now.</p>
+            ) : user ? (
               <form action={toggleLab} className="mt-3">
                 <input type="hidden" name="lab_id" value={id} />
                 <input type="hidden" name="path" value={path} />

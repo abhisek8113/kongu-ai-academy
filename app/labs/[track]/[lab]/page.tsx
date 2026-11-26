@@ -13,10 +13,11 @@ export default async function LabPage({ params }: { params: { track: string; lab
   if (!t || idx < 0) notFound();
   const lab = t.labs[idx];
   const next = t.labs[idx + 1];
-  let user: any = null, done = false, submission = "";
+  let user: any = null, approved = false, done = false, submission = "";
   try {
     const ctx = await getUserAndProfile();
     user = ctx.user;
+    approved = ctx.profile?.status === "approved";
     if (user) {
       const { data } = await ctx.supabase.from("lab_progress").select("*").eq("user_id", user.id).eq("lab_id", lab.id).maybeSingle();
       done = !!data; submission = data?.submission_url ?? "";
@@ -48,7 +49,9 @@ export default async function LabPage({ params }: { params: { track: string; lab
       <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
         <div className="card">
           <h2 className="text-lg font-bold">Your progress</h2>
-          {user ? (
+          {user && !approved ? (
+            <p className="mt-2 text-sm text-gold">Your account is awaiting approval. You can read the lesson and use the notebook now.</p>
+          ) : user ? (
             <form action={toggleLab} className="mt-3 grid gap-3">
               <input type="hidden" name="lab_id" value={lab.id} />
               <input type="hidden" name="path" value={path} />
@@ -66,7 +69,7 @@ export default async function LabPage({ params }: { params: { track: string; lab
           )}
         </div>
         {next && (
-          <Link href={`/labs/${t.slug}/${next.id}`} className="card block hover:border-ink">
+          <Link href={`/labs/${t.slug}/${next.id}`} className="card block hover:border-line">
             <div className="text-sm text-mute">Next lab</div><div className="font-bold">{next.title} →</div>
           </Link>
         )}

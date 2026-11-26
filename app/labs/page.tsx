@@ -11,7 +11,7 @@ export default function LabsPage() {
       <p className="mt-3 max-w-2xl text-mute">Short, structured labs used in our workshops and FDPs: AI, machine learning and Microsoft Power Platform. Each lab lists its objectives, steps and deliverable.</p>
       {tracks.map((t, i) => (
         <section key={t.slug} className="mt-14">
-          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-ink pb-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-3">
             <h2 className="text-2xl"><span className="font-mono text-[15px] text-mute">{String(i + 1).padStart(2, "0")}</span> <Link href={`/labs/${t.slug}`} className="hover:text-madder">{t.name}</Link></h2>
             <span className="text-sm text-mute">{t.tagline}</span>
           </div>
