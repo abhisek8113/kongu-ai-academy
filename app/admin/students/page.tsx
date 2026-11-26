@@ -52,9 +52,10 @@ export default async function StudentsPage({ searchParams }: { searchParams: { q
                     {p.role === "admin" ? <span className="pill border-gold/40 text-gold">owner</span> : (
                       <form action={setStudentStatus} className="flex items-center gap-1.5">
                         <input type="hidden" name="id" value={p.id} /><input type="hidden" name="name" value={p.full_name || p.email || ""} />
-                        <span className={`pill ${p.status === "approved" ? "border-[#1f7a4d] text-[#5fd39a]" : p.status === "rejected" ? "border-[#FF8A8A]/50 text-[#FF8A8A]" : "border-gold/50 text-gold"}`}>{p.status}</span>
-                        {p.status !== "approved" && <button name="status" value="approved" className="rounded-md bg-madder px-2 py-1 text-xs text-white">Approve</button>}
-                        {p.status !== "rejected" && <button name="status" value="rejected" className="rounded-md border border-line px-2 py-1 text-xs text-mute hover:text-ink">Reject</button>}
+                        <span className={`pill ${p.status === "approved" ? "border-[#1f7a4d] text-[#5fd39a]" : p.status === "rejected" || p.status === "suspended" ? "border-[#FF8A8A]/50 text-[#FF8A8A]" : "border-gold/50 text-gold"}`}>{p.status}</span>
+                        {p.status !== "approved" && <button name="status" value="approved" className="rounded-md bg-madder px-2 py-1 text-xs text-white">{p.status === "suspended" ? "Reactivate" : "Approve"}</button>}
+                        {p.status === "pending" && <button name="status" value="rejected" className="rounded-md border border-line px-2 py-1 text-xs text-mute hover:text-ink">Reject</button>}
+                        {p.status === "approved" && <button name="status" value="suspended" className="rounded-md border border-[#FF8A8A]/40 px-2 py-1 text-xs text-[#FF8A8A]">Suspend</button>}
                       </form>
                     )}
                   </td>

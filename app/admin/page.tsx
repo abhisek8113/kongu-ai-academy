@@ -9,7 +9,15 @@ export default async function AdminOverview() {
   const twoWeeks = new Date(Date.now() - 14 * 86400000).toISOString();
   const week = new Date(Date.now() - 7 * 86400000).toISOString();
 
-  const pendingAcc = await supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending");
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const [pendingAcc, newRegs, openT, resolvedT, failedRuns, sessions] = await Promise.all([
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", weekAgo),
+    supabase.from("support_tickets").select("id", { count: "exact", head: true }).not("status", "in", "(Resolved,Closed)"),
+    supabase.from("support_tickets").select("id", { count: "exact", head: true }).in("status", ["Resolved", "Closed"]),
+    supabase.from("lab_executions").select("id", { count: "exact", head: true }).eq("ok", false),
+    supabase.from("activity_log").select("id", { count: "exact", head: true }).eq("action", "lab_open"),
+  ]);
   const [students, activeToday, recent, last14, done7, leadsNew, pending, certs, allDone] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student"),
     supabase.from("profiles").select("id", { count: "exact", head: true }).gte("last_seen_at", day),
@@ -39,11 +47,15 @@ export default async function AdminOverview() {
 
   const kpis: [string, number | null, string][] = [
     ["Accounts to approve", pendingAcc.count, "/admin/students?sort=pending"],
+    ["New registrations (7 days)", newRegs.count, "/admin/students"],
+    ["Open issues", openT.count, "/admin/issues"],
+    ["Resolved issues", resolvedT.count, "/admin/issues?status=all"],
+    ["Lab sessions", sessions.count, "/admin/labs"],
+    ["Failed lab runs", failedRuns.count, "/admin/labs?sort=fails"],
     ["Students", students.count, "/admin/students"],
     ["Active in last 24 h", activeToday.count, "/admin/activity"],
     ["Labs completed (7 days)", done7.count, "/admin/activity?group=Labs"],
     ["New leads", leadsNew.count, "/admin/leads"],
-    ["Enrolments to approve", pending.count, "/admin/batches"],
 
   ];
 
@@ -53,7 +65,7 @@ export default async function AdminOverview() {
         <h1 className="text-[32px] font-semibold leading-tight">Overview</h1>
         <AutoRefresh />
       </div>
-      <dl className="mt-6 grid grid-cols-2 border-l border-t border-rule sm:grid-cols-3">
+      <dl className="mt-6 grid grid-cols-2 border-l border-t border-rule sm:grid-cols-3 xl:grid-cols-5">
         {kpis.map(([label, n, href]) => (
           <Link key={label} href={href} className="border-b border-r border-rule p-4 hover:bg-cream">
             <dt className="text-sm text-mute">{label}</dt>

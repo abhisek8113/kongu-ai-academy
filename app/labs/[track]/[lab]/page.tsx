@@ -1,3 +1,4 @@
+import { requirePublished } from "@/lib/published";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTrack } from "@/lib/labs";
@@ -11,6 +12,7 @@ export default async function LabPage({ params }: { params: { track: string; lab
   const t = getTrack(params.track);
   const idx = t?.labs.findIndex((l) => l.id === params.lab) ?? -1;
   if (!t || idx < 0) notFound();
+  await requirePublished(params.lab);
   const lab = t.labs[idx];
   const next = t.labs[idx + 1];
   let user: any = null, approved = false, done = false, submission = "";

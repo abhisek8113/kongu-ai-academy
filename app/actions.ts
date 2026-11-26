@@ -23,7 +23,7 @@ export async function signIn(_: unknown, f: FormData) {
   if (error) return { error: error.message };
   await logActivity(supabase, data.user, "login");
   const next = s(f, "next");
-  redirect(next.startsWith("/") ? next : "/dashboard");
+  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
 }
 
 export async function signUp(_: unknown, f: FormData) {
@@ -33,7 +33,7 @@ export async function signUp(_: unknown, f: FormData) {
     password: s(f, "password"),
     options: {
       data: { full_name: s(f, "full_name"), phone: s(f, "phone"), institution: s(f, "institution") },
-      emailRedirectTo: `${origin()}/login`,
+      emailRedirectTo: `${origin()}/auth/callback?next=/dashboard`,
     },
   });
   if (error) return { error: error.message };
@@ -154,11 +154,127 @@ export async function issueCertificate(f: FormData) {
 export async function setStudentStatus(f: FormData) {
   const { supabase, user } = await requireAdmin();
   const status = s(f, "status");
-  if (!["approved", "rejected", "pending"].includes(status)) return;
+  if (!["approved", "rejected", "pending", "suspended"].includes(status)) return;
   const id = s(f, "id");
   await supabase.from("profiles").update({ status }).eq("id", id).neq("role", "admin");
   await logActivity(supabase, user, "admin_approval", { student: s(f, "name"), status });
   revalidatePath("/admin");
   revalidatePath("/admin/students");
   revalidatePath(`/admin/students/${id}`);
+}
+
+// ───────────── Password reset ─────────────
+export async function requestPasswordReset(_: unknown, f: FormData) {
+  const email = s(f, "email");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Enter the email you signed up with." };
+  const supabase = createClient();
+  await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${origin()}/auth/callback?next=/account/password` });
+  // Same answer whether or not the email exists, so accounts can't be discovered.
+  return { ok: "If an account exists for that email, a reset link is on its way. Check your inbox and spam folder." };
+}
+
+export async function updatePassword(_: unknown, f: FormData) {
+  const pw = s(f, "password"), pw2 = s(f, "password2");
+  if (pw.length < 8) return { error: "Use at least 8 characters." };
+  if (pw !== pw2) return { error: "The two passwords don't match." };
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Your reset link has expired. Request a new one." };
+  const { error } = await supabase.auth.updateUser({ password: pw });
+  if (error) return { error: error.message };
+  return { ok: "Password updated. You're signed in." };
+}
+
+// ───────────── Support tickets ─────────────
+const CATEGORIES = ["Laboratory not loading", "Code execution failure", "Incorrect output", "Login problem", "Access problem", "Website performance", "Other technical issue"];
+const SEVERITIES = ["Low", "Medium", "High", "Critical"];
+const TICKET_STATUS = ["New", "Under Review", "In Progress", "Waiting for Student", "Resolved", "Closed"];
+
+export async function createTicket(_: unknown, f: FormData) {
+  const { supabase, user, profile } = await getUserAndProfile();
+  if (!user) return { error: "Please log in to report an issue." };
+  const category = s(f, "category"), severity = s(f, "severity") || "Medium";
+  const description = s(f, "description").slice(0, 4000);
+  if (!CATEGORIES.includes(category)) return { error: "Choose an issue category." };
+  if (!SEVERITIES.includes(severity)) return { error: "Choose a severity." };
+  if (description.length < 5) return { error: "Please describe what happened (at least a few words)." };
+  const { data, error } = await supabase.from("support_tickets").insert({
+    user_id: user.id, student_name: profile?.full_name || user.email, lab: s(f, "lab").slice(0, 200) || null,
+    category, severity, description, error_message: s(f, "error_message").slice(0, 4000) || null,
+    browser: s(f, "browser").slice(0, 400) || null, page_url: s(f, "page_url").slice(0, 400) || null,
+  }).select("id").single();
+  if (error || !data) return { error: "We couldn't save your report. Please WhatsApp +91 95145 24599." };
+  await logActivity(supabase, user, "ticket_new", { id: data.id, category, lab: s(f, "lab") });
+  revalidatePath("/dashboard");
+  return { ok: `Issue #${data.id} reported. You can follow it under Dashboard → My issues.`, id: data.id };
+}
+
+export async function replyToTicket(f: FormData) {
+  const { supabase, user, profile } = await getUserAndProfile();
+  if (!user) redirect("/login");
+  const id = Number(f.get("ticket_id")), body = s(f, "body").slice(0, 4000);
+  if (!id || !body) return;
+  const isAdmin = profile?.role === "admin";
+  const internal = isAdmin && s(f, "internal") === "1";
+  await supabase.from("support_ticket_messages").insert({
+    ticket_id: id, author_id: user.id, author_name: isAdmin ? "Kongu AI Academy" : profile?.full_name || user.email, body, internal,
+  });
+  if (isAdmin) await logActivity(supabase, user, internal ? "admin_ticket_note" : "admin_ticket_reply", { id });
+  revalidatePath(isAdmin ? `/admin/issues/${id}` : `/dashboard/issues/${id}`);
+}
+
+export async function updateTicket(f: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const id = Number(f.get("id"));
+  const status = s(f, "status"), severity = s(f, "severity");
+  const patch: Record<string, unknown> = {};
+  if (TICKET_STATUS.includes(status)) patch.status = status;
+  if (SEVERITIES.includes(severity)) patch.severity = severity;
+  if (s(f, "assign") === "me") patch.assigned_to = user!.id;
+  if (s(f, "assign") === "none") patch.assigned_to = null;
+  await supabase.from("support_tickets").update(patch).eq("id", id);
+  await logActivity(supabase, user, "admin_ticket_update", { id, ...patch });
+  revalidatePath(`/admin/issues/${id}`);
+  revalidatePath("/admin/issues");
+}
+
+// ───────────── Labs: publishing + executions ─────────────
+export async function setLabPublished(f: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const lab_id = s(f, "lab_id"), published = s(f, "published") === "1";
+  await supabase.from("lab_settings").upsert({ lab_id, published, updated_at: new Date().toISOString() });
+  await logActivity(supabase, user, "admin_lab_publish", { lab: lab_id, title: s(f, "title"), published });
+  revalidatePath("/admin/labs");
+  revalidatePath("/", "layout");
+}
+
+export async function logExecution(lab_id: string, ok: boolean, error: string | null, duration_ms: number) {
+  const { supabase, user } = await getUserAndProfile();
+  if (!user) return;
+  await supabase.from("lab_executions").insert({ user_id: user.id, lab_id: lab_id.slice(0, 120), ok, error: error?.slice(0, 1000) ?? null, duration_ms: Math.round(duration_ms) });
+}
+
+// ───────────── Announcements + notifications ─────────────
+export async function saveAnnouncement(f: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const id = Number(f.get("id")) || null;
+  const title = s(f, "title").slice(0, 160), body = s(f, "body").slice(0, 4000);
+  if (s(f, "delete") === "1" && id) {
+    await supabase.from("announcements").delete().eq("id", id);
+  } else if (s(f, "toggle") === "1" && id) {
+    await supabase.from("announcements").update({ published: s(f, "published") === "1", updated_at: new Date().toISOString() }).eq("id", id);
+  } else if (title.length >= 3 && body) {
+    await supabase.from("announcements").insert({ title, body, published: true });
+    await logActivity(supabase, user, "admin_announcement", { title });
+  }
+  revalidatePath("/admin/announcements");
+  revalidatePath("/dashboard");
+}
+
+export async function markNotificationsRead() {
+  const { supabase, user } = await getUserAndProfile();
+  if (!user) return;
+  await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("user_id", user.id).is("read_at", null);
+  revalidatePath("/notifications");
+  revalidatePath("/", "layout");
 }

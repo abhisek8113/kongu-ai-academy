@@ -92,7 +92,7 @@ export default function Home() {
           <div className="max-w-[640px]">
             <p className="kicker">Kongu AI Academy · Coimbatore</p>
             <h1 className="mt-5 text-[42px] leading-[1.03] sm:text-[64px]">
-              <span className="grad-text">Build Your Future in Artificial Intelligence.</span>
+              <span className="grad-text">Build the Skills to Engineer the Future of AI.</span>
             </h1>
             <p className="mt-6 max-w-[540px] text-lg text-mute">
               Master Python, Data Science, Machine Learning and Generative AI through practical projects, real datasets and hands-on laboratory experiences.

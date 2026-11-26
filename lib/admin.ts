@@ -48,6 +48,12 @@ export function describe(a: { action: string; meta: any }) {
     case "admin_enrolment": return `set ${m.student ?? "a student"} → ${m.status}${m.batch ? ` (${m.batch})` : ""}`;
     case "admin_lead": return `marked lead ${m.lead ?? ""} → ${m.status}`;
     case "admin_approval": return `${m.status === "approved" ? "approved" : m.status === "rejected" ? "rejected" : "reset"} ${m.student ?? "an account"}`;
+    case "ticket_new": return `reported issue #${m.id} · ${m.category}${m.lab ? ` (${m.lab})` : ""}`;
+    case "admin_ticket_update": return `updated issue #${m.id}${m.status ? ` → ${m.status}` : ""}`;
+    case "admin_ticket_reply": return `replied to issue #${m.id}`;
+    case "admin_ticket_note": return `added an internal note to issue #${m.id}`;
+    case "admin_lab_publish": return `${m.published ? "published" : "unpublished"} ${m.title ?? m.lab}`;
+    case "admin_announcement": return `posted announcement “${m.title}”`;
     case "admin_certificate": return `issued certificate ${m.id} to ${m.recipient}`;
     default: return a.action;
   }
@@ -58,7 +64,8 @@ export const ACTION_GROUPS: Record<string, string[]> = {
   "Logins": ["login", "logout", "signup"],
   "Labs": ["lab_open", "colab_open", "lab_complete", "lab_undo"],
   "Leads & enrolment": ["enquiry", "enrol_request"],
-  "Admin actions": ["admin_approval", "admin_batch", "admin_batch_toggle", "admin_enrolment", "admin_lead", "admin_certificate"],
+  "Support": ["ticket_new", "admin_ticket_update", "admin_ticket_reply", "admin_ticket_note"],
+  "Admin actions": ["admin_lab_publish", "admin_announcement", "admin_ticket_update", "admin_ticket_reply", "admin_approval", "admin_batch", "admin_batch_toggle", "admin_enrolment", "admin_lead", "admin_certificate"],
 };
 
 export const dotColor = (action: string) =>

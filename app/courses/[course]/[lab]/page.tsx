@@ -5,6 +5,8 @@ import { getUserAndProfile } from "@/lib/supabase/server";
 import { toggleLab } from "@/app/actions";
 import LabViewer from "@/components/LabViewer";
 import ColabButton from "@/components/ColabButton";
+import ReportIssue from "@/components/ReportIssue";
+import { requirePublished } from "@/lib/published";
 import { logActivity } from "@/lib/activity";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +15,7 @@ export default async function CourseLabPage({ params }: { params: { course: stri
   const c = getCourse(params.course);
   const idx = c?.labs.findIndex((l) => l.lab === params.lab) ?? -1;
   if (!c || idx < 0) notFound();
+  await requirePublished(`${params.course}/${params.lab}`);
   const l = c.labs[idx];
   const prev = c.labs[idx - 1], next = c.labs[idx + 1];
   const id = `${c.slug}/${l.lab}`;
@@ -44,6 +47,7 @@ export default async function CourseLabPage({ params }: { params: { course: stri
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
           <div className="card grid gap-3">
             <ColabButton href={l.colab} lab={id} title={l.title} />
+            <ReportIssue lab={l.title} />
             <a href={`${l.base}/${l.notebook}`} download className="btn-ghost text-madder">Download notebook (.ipynb)</a>
             <a href={`${l.base}/bundle/dataset.zip`} download className="btn-ghost text-madder">Download dataset (.zip)</a>
             {l.datasets.length > 0 && <p className="text-xs text-mute">Includes: {l.datasets.join(", ")}</p>}
