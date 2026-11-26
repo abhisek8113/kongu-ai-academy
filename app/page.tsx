@@ -84,11 +84,11 @@ export default function Home() {
       <Reveal />
 
       {/* HERO */}
-      <section className="relative -mt-[68px] flex min-h-[100svh] items-center overflow-hidden">
+      <section className="relative -mt-[68px] flex min-h-[100svh] flex-col overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_45%,rgba(56,107,255,.22),transparent_55%),radial-gradient(ellipse_at_15%_80%,rgba(0,212,255,.08),transparent_50%)]" />
         <div className="bg-grid absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
         <div className="absolute inset-y-0 right-[-35%] w-[110%] opacity-60 sm:right-[-15%] sm:opacity-100 lg:right-[-4%] lg:w-[62%]"><HeroScene /></div>
-        <div className="wrap relative z-10 pb-36 pt-32">
+        <div className="wrap relative z-10 flex flex-1 items-center pb-12 pt-32 lg:pb-36">
           <div className="max-w-[640px]">
             <p className="kicker">Kongu AI Academy · Coimbatore</p>
             <h1 className="mt-5 text-[42px] leading-[1.03] sm:text-[64px]">
@@ -104,7 +104,7 @@ export default function Home() {
             <p className="mt-6 font-display text-sm tracking-wide text-gold">Learn AI. Build Intelligence. Shape Tomorrow.</p>
           </div>
         </div>
-        <div className="absolute inset-x-0 bottom-0 z-10 border-t border-white/10 bg-night/50 backdrop-blur-md">
+        <div className="relative z-10 border-t border-white/10 bg-night/60 backdrop-blur-md lg:absolute lg:inset-x-0 lg:bottom-0">
           <dl className="wrap grid grid-cols-2 lg:grid-cols-4">
             {trust.map(([a, b], i) => (
               <div key={b} className={`py-5 ${i % 2 ? "border-l border-white/10 pl-5 lg:pl-8" : ""} ${i === 2 ? "lg:border-l lg:pl-8" : ""}`}>
