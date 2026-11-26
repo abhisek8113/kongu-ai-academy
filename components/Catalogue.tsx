@@ -26,14 +26,14 @@ export default function Catalogue({ rows, courses }: { rows: Row[]; courses: { s
       <ol>
         {shown.map((r) => (
           <li key={r.href} className="border-b border-rule">
-            <Link href={r.href} className="group grid grid-cols-[3rem_1fr] gap-x-4 gap-y-1 py-4 sm:grid-cols-[3rem_1fr_13rem_6rem]">
+            <Link href={r.href} className="group grid grid-cols-[3rem_1fr] gap-x-4 gap-y-1 py-4 sm:grid-cols-[3rem_1fr_14rem_9.5rem]">
               <span className="font-mono text-[13px] text-mute">{String(r.num).padStart(2, "0")}</span>
               <span>
                 <span className="font-medium group-hover:text-madder group-hover:underline">{r.title}</span>
                 <span className="mt-0.5 block font-mono text-[12px] text-mute">{r.data}</span>
               </span>
               <span className="col-start-2 text-sm text-mute sm:col-start-auto">{r.course}</span>
-              <span className="col-start-2 font-mono text-[12px] text-mute sm:col-start-auto sm:text-right">{[r.level, r.time].filter(Boolean).join(" · ")}</span>
+              <span className="col-start-2 font-mono text-[12px] leading-5 text-mute sm:col-start-auto sm:text-right"><span className="sm:block">{r.level}</span><span className="sm:hidden"> · </span><span className="whitespace-nowrap sm:block">{r.time}</span></span>
             </Link>
           </li>
         ))}
