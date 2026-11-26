@@ -26,13 +26,13 @@ export default async function CourseLabPage({ params }: { params: { course: stri
   } catch {}
   return (
     <div className="wrap py-8">
-      <Link href={`/courses/${c.slug}`} className="text-sm font-semibold text-madder underline">{c.name}</Link>
-      <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">Lab {String(l.num).padStart(2, "0")} · {l.title}</h1>
+      <Link href={`/courses/${c.slug}`} className="kicker hover:text-ink">← {c.name}</Link>
+      <h1 className="mt-2 text-3xl font-semibold sm:text-4xl"><span className="font-mono text-[0.6em] text-mute">{String(l.num).padStart(2, "0")}</span> {l.title}</h1>
       <div className="mt-3 flex flex-wrap gap-2">
-        {l.track && <span className="pill bg-cream">{l.track}</span>}
-        {l.level && <span className="pill bg-cream">{l.level}</span>}
-        {l.time && <span className="pill bg-cream">{l.time}</span>}
-        <span className="pill bg-cream">Google Colab</span>
+        {l.track && <span className="pill">{l.track}</span>}
+        {l.level && <span className="pill">{l.level}</span>}
+        {l.time && <span className="pill">{l.time}</span>}
+        <span className="pill">Google Colab</span>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_300px]">
@@ -42,7 +42,7 @@ export default async function CourseLabPage({ params }: { params: { course: stri
             <a href={l.colab} target="_blank" rel="noreferrer" className="btn-sun">Open notebook in Colab</a>
             <a href={`${l.base}/${l.notebook}`} download className="btn-ghost text-madder">Download notebook (.ipynb)</a>
             <a href={`${l.base}/bundle/dataset.zip`} download className="btn-ghost text-madder">Download dataset (.zip)</a>
-            {l.datasets.length > 0 && <p className="text-xs text-[#5d5550]">Includes: {l.datasets.join(", ")}</p>}
+            {l.datasets.length > 0 && <p className="text-xs text-mute">Includes: {l.datasets.join(", ")}</p>}
           </div>
           {l.goals.length > 0 && (
             <div className="card">

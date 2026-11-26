@@ -12,7 +12,7 @@ export default function AuthForm({ mode, next }: { mode: "login" | "signup"; nex
   const [state, action] = useFormState(mode === "login" ? signIn : signUp, null as any);
   return (
     <form action={action} className="card grid gap-3">
-      <h1 className="text-3xl font-extrabold">{mode === "login" ? "Log in" : "Create your free account"}</h1>
+      <h1 className="text-3xl font-semibold">{mode === "login" ? "Log in" : "Create your free account"}</h1>
       {mode === "signup" && (
         <>
           <label className="label">Full name<input name="full_name" required className="input" autoComplete="name" /></label>
@@ -28,7 +28,7 @@ export default function AuthForm({ mode, next }: { mode: "login" | "signup"; nex
       {state?.error && <p className="text-sm font-semibold text-red-700">{state.error}</p>}
       {state?.ok && <p className="text-sm font-semibold text-green-800">{state.ok}</p>}
       <Submit label={mode === "login" ? "Log in" : "Create account"} />
-      <p className="text-sm text-[#5d5550]">
+      <p className="text-sm text-mute">
         {mode === "login" ? <>New here? <Link href="/signup" className="font-semibold text-madder underline">Join free</Link></> : <>Have an account? <Link href="/login" className="font-semibold text-madder underline">Log in</Link></>}
       </p>
     </form>

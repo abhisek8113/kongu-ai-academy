@@ -9,20 +9,20 @@ const tabs = [
 export default function LabViewer({ base }: { base: string }) {
   const [tab, setTab] = useState(tabs[0]);
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#e8dfd8]">
-      <div className="flex gap-1 bg-cream p-1.5" role="tablist">
+    <div className="border border-ink">
+      <div className="flex gap-6 border-b border-ink px-4" role="tablist">
         {tabs.map((t) => (
           <button
             key={t.key}
             role="tab"
             aria-selected={tab.key === t.key}
             onClick={() => setTab(t)}
-            className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold ${tab.key === t.key ? "bg-madder text-white" : "hover:bg-white"}`}
+            className={`-mb-px min-h-[44px] border-b-2 text-sm ${tab.key === t.key ? "border-madder font-medium" : "border-transparent text-mute hover:text-ink"}`}
           >
             {t.label}
           </button>
         ))}
-        <a href={`${base}/${tab.file}`} target="_blank" rel="noreferrer" className="ml-auto self-center px-3 text-sm text-madder underline">Open full page</a>
+        <a href={`${base}/${tab.file}`} target="_blank" rel="noreferrer" className="ml-auto self-center font-mono text-[12px] text-mute underline hover:text-ink">Open full page</a>
       </div>
       <iframe key={tab.key} src={`${base}/${tab.file}`} title={tab.label} className="h-[75vh] w-full bg-white" />
     </div>

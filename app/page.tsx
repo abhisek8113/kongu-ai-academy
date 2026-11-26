@@ -1,102 +1,86 @@
 import Link from "next/link";
+import { courseLabs, courses } from "@/lib/courseLabs";
 import { tracks } from "@/lib/labs";
 import EnquiryForm from "@/components/EnquiryForm";
-import Loom from "@/components/Loom";
-import { courseLabs, courses } from "@/lib/courseLabs";
+import NotebookPreview from "@/components/NotebookPreview";
+import Catalogue from "@/components/Catalogue";
 
-const formats = [
-  ["90-minute demo session", "Any department or school", "Free"],
-  ["1-day school workshop", "Classes 6–12, up to 60", "₹250 / student"],
-  ["1-day college workshop", "UG students, up to 60", "₹600 / student"],
-  ["2–3 day hands-on workshop", "UG / PG students", "₹1,200 / student"],
-  ["5-day FDP", "Faculty, 30–40", "₹75,000 / batch"],
-  ["30-hour value-added course", "Semester batch", "₹3,500 / student"],
-  ["Corporate Power Platform / AI training", "Teams", "On request"],
+const offers = [
+  { name: "Workshops", time: "1–3 days", price: "from ₹600 / student", body: "Hands-on sessions on Python, machine learning, Generative AI or Power BI. Every student leaves with a finished notebook or dashboard." },
+  { name: "Faculty development", time: "5 days", price: "from ₹75,000 / batch", body: "FDPs that hand your faculty the full lab kit: notebooks, datasets and step-by-step guides they can teach from next semester." },
+  { name: "Value-added courses", time: "30–45 hours", price: "from ₹3,500 / student", body: "Semester courses built from these labs, mapped to Anna University or Bharathiar syllabi, with a capstone and certificate." },
 ];
 
 export default function Home() {
-  const labCount = tracks.reduce((n, t) => n + t.labs.length, 0);
+  const rows = courses.flatMap((c) =>
+    c.labs.map((l) => ({
+      href: `/courses/${c.slug}/${l.lab}`, num: l.num, title: l.title, course: c.name, courseSlug: c.slug,
+      level: l.level, time: l.time.replace("~", ""), data: l.datasets.filter((d) => !d.endsWith(".md")).slice(0, 2).join(", "),
+    }))
+  );
   return (
     <>
-      <section className="bg-madder text-white">
-        <div className="wrap grid items-center gap-10 py-14 md:grid-cols-2 md:py-20">
-          <div>
-            <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">
-              Hands-on AI, ML and Power Platform labs for colleges, schools and teams
-            </h1>
-            <p className="mt-5 max-w-xl text-lg text-[#f6dfe2]">
-              Practitioner-led workshops, FDPs and lab courses from Coimbatore. Every learner builds a real project, and we stay with them for 30 days afterwards.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/labs" className="btn-sun">Explore {labCount} labs</Link>
-              <a href="#demo" className="btn-ghost text-white">Book a free demo</a>
-            </div>
-            <dl className="mt-9 flex flex-wrap gap-8 border-t border-white/20 pt-6">
-              <div><dt className="font-display text-2xl font-extrabold">{tracks.length} tracks</dt><dd className="text-sm text-[#f2cfd4]">AI · ML · Power BI · Power Apps · Power Automate</dd></div>
-              <div><dt className="font-display text-2xl font-extrabold">6 years</dt><dd className="text-sm text-[#f2cfd4]">teaching and corporate training</dd></div>
-              <div><dt className="font-display text-2xl font-extrabold">30 days</dt><dd className="text-sm text-[#f2cfd4]">post-training project support</dd></div>
-            </dl>
+      <section className="wrap grid gap-12 pb-16 pt-12 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:pt-16">
+        <div>
+          <p className="kicker">Coimbatore · {courseLabs.length} Colab labs · real datasets</p>
+          <h1 className="mt-4 text-[40px] leading-[1.05] sm:text-[52px]">Learn data science by running real notebooks.</h1>
+          <p className="mt-5 max-w-lg text-lg text-mute">
+            Kongu AI Academy teaches Python, machine learning and AI through labs you open in Google Colab and finish yourself. For students, colleges and teams across Tamil Nadu.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/courses" className="btn-red">Browse the labs</Link>
+            <a href="#demo" className="btn-ghost">Book a session for your college</a>
           </div>
-          <Loom />
         </div>
+        <NotebookPreview />
       </section>
 
-      <section className="wrap py-16">
-        <h2 className="text-3xl font-extrabold sm:text-4xl">Five lab tracks, one portal</h2>
-        <p className="mt-3 max-w-2xl text-[#5d5550]">Each lab has objectives, step-by-step tasks and a deliverable for the learner's portfolio. Learners track their progress in their dashboard.</p>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {tracks.map((t) => (
-            <Link key={t.slug} href={`/labs/${t.slug}`} className="card group flex flex-col gap-3 transition hover:-translate-y-0.5 hover:shadow-lg">
-              <span className="grid h-12 w-12 place-items-center rounded-xl font-display text-lg font-extrabold text-white" style={{ background: t.color }}>{t.short}</span>
-              <h3 className="text-xl font-bold">{t.name}</h3>
-              <p className="text-[#5d5550]">{t.tagline}</p>
-              <span className="mt-auto text-sm font-semibold text-madder">{t.labs.length} labs →</span>
-            </Link>
+      <section className="wrap" id="catalogue">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-t border-ink pt-6">
+          <h2 className="text-3xl">The catalogue</h2>
+          <p className="max-w-md text-sm text-mute">Each lab has a lesson, a Colab notebook, a dataset and a self-check. Free to read; log in to track your progress.</p>
+        </div>
+        <div className="mt-6">
+          <Catalogue rows={rows} courses={courses.map((c) => ({ slug: c.slug, name: c.name, count: c.labs.length }))} />
+        </div>
+        <p className="mt-6 text-sm text-mute">
+          Also available as instructor-led tracks: {tracks.map((t, i) => (
+            <span key={t.slug}>{i > 0 && ", "}<Link href={`/labs/${t.slug}`} className="text-ink underline hover:text-madder">{t.name}</Link></span>
+          ))}.
+        </p>
+      </section>
+
+      <section className="wrap mt-24" id="institutions">
+        <div className="border-t border-ink pt-6">
+          <h2 className="text-3xl">For colleges and schools</h2>
+        </div>
+        <div className="mt-8 grid gap-10 md:grid-cols-3">
+          {offers.map((o) => (
+            <div key={o.name} className="border-t border-rule pt-5">
+              <h3 className="text-xl">{o.name}</h3>
+              <p className="mt-1 font-mono text-[13px] text-mute">{o.time} · {o.price}</p>
+              <p className="mt-4 text-[15px]">{o.body}</p>
+            </div>
           ))}
         </div>
+        <p className="mt-8 text-sm text-mute">CBSE schools: support for AI subjects 417 and 843, from Class 9. Prices exclude GST.</p>
       </section>
 
-      <section className="wrap pb-16">
-        <div className="card flex flex-wrap items-center gap-6 border-2 border-madder/20">
-          <div className="flex-1">
-            <h2 className="text-2xl font-extrabold sm:text-3xl">{courseLabs.length} full course labs with Colab notebooks</h2>
-            <p className="mt-2 text-[#5d5550]">{courses.map((c) => `${c.name} (${c.labs.length} labs)`).join(" · ")}. Every lab has a lesson, a runnable notebook and a real dataset.</p>
-          </div>
-          <Link href="/courses" className="btn-red">Start a course</Link>
+      <section className="wrap mt-24 grid gap-12 lg:grid-cols-2">
+        <div className="border-t border-ink pt-6">
+          <h2 className="text-3xl">Who teaches</h2>
+          <p className="mt-5 text-lg">Abhisek M</p>
+          <p className="text-mute">Founder and lead trainer</p>
+          <dl className="mt-6 grid grid-cols-[8rem_1fr] gap-y-3 text-[15px]">
+            <dt className="font-mono text-[13px] text-mute">Education</dt><dd>M.Sc Statistics, PSG College of Arts and Science</dd>
+            <dt className="font-mono text-[13px] text-mute">Experience</dt><dd>6 years teaching and training</dd>
+            <dt className="font-mono text-[13px] text-mute">Corporate</dt><dd>Data analytics and AI training, including for SLB</dd>
+            <dt className="font-mono text-[13px] text-mute">Colleges</dt><dd>Programmes at KGiSL, Nandha and Kaleeswari</dd>
+          </dl>
         </div>
-      </section>
-
-      <section className="bg-cream py-16">
-        <div className="wrap">
-          <h2 className="text-3xl font-extrabold sm:text-4xl">Formats and starting prices</h2>
-          <p className="mt-3 text-[#5d5550]">Programmes are mapped to Anna University, Bharathiar University or CBSE (AI 417/843) syllabi.</p>
-          <div className="mt-6 overflow-x-auto">
-            <table className="tbl bg-white">
-              <thead><tr><th>Format</th><th>Who it is for</th><th className="text-right">Starts at</th></tr></thead>
-              <tbody>
-                {formats.map((f) => (
-                  <tr key={f[0]}><td className="font-semibold">{f[0]}</td><td>{f[1]}</td><td className="whitespace-nowrap text-right font-semibold">{f[2]}</td></tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-2 text-xs text-[#5d5550]">Prices exclude GST. Travel outside Coimbatore at actuals.</p>
-        </div>
-      </section>
-
-      <section className="wrap grid gap-10 py-16 md:grid-cols-2">
-        <div>
-          <h2 className="text-3xl font-extrabold sm:text-4xl">Taught by a working data scientist</h2>
-          <ul className="mt-5 list-disc space-y-2 pl-5">
-            <li>Abhisek M: M.Sc Statistics (PSG College of Arts and Science), B.Sc Mathematics</li>
-            <li>6 years of teaching and training, from school students to corporate teams</li>
-            <li>Corporate trainer in data analytics and AI, including programmes for SLB</li>
-            <li>Programmes delivered at KGiSL, Nandha and Kaleeswari colleges</li>
-          </ul>
-        </div>
-        <div id="demo" className="card scroll-mt-24">
-          <h2 className="text-2xl font-extrabold">Book a free 90-minute demo</h2>
-          <p className="mb-4 mt-2 text-sm text-[#5d5550]">We'll suggest the right format and send a syllabus within 48 hours.</p>
+        <div id="demo" className="scroll-mt-24 border-t border-ink pt-6">
+          <h2 className="text-3xl">Book a free demo</h2>
+          <p className="mb-6 mt-3 text-mute">A 90-minute session for one class. We'll reply within 48 hours with a date and a syllabus.</p>
           <EnquiryForm />
         </div>
       </section>

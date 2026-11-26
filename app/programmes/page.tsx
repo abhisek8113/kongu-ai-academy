@@ -17,8 +17,8 @@ export default async function Programmes() {
   return (
     <div className="wrap grid gap-10 py-12 lg:grid-cols-[1fr_380px]">
       <section>
-        <h1 className="text-4xl font-extrabold">Open programmes</h1>
-        <p className="mt-3 text-[#5d5550]">Join an upcoming batch. Your enrolment request is confirmed by our team.</p>
+        <h1 className="text-[40px] font-semibold leading-tight">Open programmes</h1>
+        <p className="mt-3 text-mute">Join an upcoming batch. Your enrolment request is confirmed by our team.</p>
         {batches.length === 0 ? (
           <div className="card mt-8">No open batches right now. Request a demo or a custom programme for your institution using the form.</div>
         ) : (
@@ -27,7 +27,7 @@ export default async function Programmes() {
               <li key={b.id} className="card flex flex-wrap items-center gap-4">
                 <div className="flex-1">
                   <h2 className="text-xl font-bold">{b.title}</h2>
-                  <p className="text-sm text-[#5d5550]">
+                  <p className="text-sm text-mute">
                     {getTrack(b.track)?.name ?? b.track}{b.institution ? ` · ${b.institution}` : ""}
                     {b.starts_on ? ` · ${b.starts_on}${b.ends_on ? ` to ${b.ends_on}` : ""}` : ""} · {b.seats} seats
                   </p>
@@ -42,8 +42,8 @@ export default async function Programmes() {
         )}
       </section>
       <aside className="card self-start">
-        <h2 className="text-2xl font-extrabold">For institutions</h2>
-        <p className="mb-4 mt-2 text-sm text-[#5d5550]">Workshops, FDPs, value-added courses and corporate training, customised to your syllabus.</p>
+        <h2 className="text-2xl font-semibold">For institutions</h2>
+        <p className="mb-4 mt-2 text-sm text-mute">Workshops, FDPs, value-added courses and corporate training, customised to your syllabus.</p>
         <EnquiryForm />
       </aside>
     </div>

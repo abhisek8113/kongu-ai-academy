@@ -33,10 +33,10 @@ export default async function Admin() {
 
   return (
     <div className="wrap py-12">
-      <h1 className="text-4xl font-extrabold">Admin</h1>
+      <h1 className="text-[40px] font-semibold leading-tight">Admin</h1>
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map(([k, v]) => (
-          <div key={k as string} className="card p-4"><div className="text-sm text-[#5d5550]">{k}</div><div className="font-display text-3xl font-extrabold">{v}</div></div>
+          <div key={k as string} className="card p-4"><div className="text-sm text-mute">{k}</div><div className="font-display text-3xl font-semibold">{v}</div></div>
         ))}
       </div>
 
@@ -49,7 +49,7 @@ export default async function Admin() {
               {(leads ?? []).map((l: any) => (
                 <tr key={l.id}>
                   <td className="whitespace-nowrap">{l.created_at.slice(0, 10)}</td>
-                  <td>{l.name}{l.message && <div className="text-xs text-[#5d5550]">{l.message}</div>}</td>
+                  <td>{l.name}{l.message && <div className="text-xs text-mute">{l.message}</div>}</td>
                   <td>{l.institution}</td>
                   <td className="whitespace-nowrap"><a className="underline" href={`https://wa.me/91${String(l.phone).replace(/\D/g, "").slice(-10)}`}>{l.phone}</a></td>
                   <td>{l.interest}</td>
@@ -87,7 +87,7 @@ export default async function Admin() {
           <ul className="mt-4 grid gap-2">
             {(batches ?? []).map((b: any) => (
               <li key={b.id} className="card flex flex-wrap items-center gap-3 p-4">
-                <span className="flex-1"><b>{b.title}</b> <span className="text-sm text-[#5d5550]">· {b.track} · {b.starts_on ?? "TBA"} · {b.seats} seats</span></span>
+                <span className="flex-1"><b>{b.title}</b> <span className="text-sm text-mute">· {b.track} · {b.starts_on ?? "TBA"} · {b.seats} seats</span></span>
                 <form action={toggleBatch}>
                   <input type="hidden" name="id" value={b.id} /><input type="hidden" name="open" value={b.is_open ? "0" : "1"} />
                   <button className="btn-ghost min-h-0 px-3 py-1 text-sm text-madder">{b.is_open ? "Close enrolment" : "Reopen"}</button>
