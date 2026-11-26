@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTrack } from "@/lib/labs";
 import { getUserAndProfile } from "@/lib/supabase/server";
 import { toggleLab } from "@/app/actions";
+import { logActivity } from "@/lib/activity";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export default async function LabPage({ params }: { params: { track: string; lab
     if (user) {
       const { data } = await ctx.supabase.from("lab_progress").select("*").eq("user_id", user.id).eq("lab_id", lab.id).maybeSingle();
       done = !!data; submission = data?.submission_url ?? "";
+      await logActivity(ctx.supabase, user, "lab_open", { lab: lab.id, title: lab.title });
     }
   } catch {}
   const path = `/labs/${t.slug}/${lab.id}`;
@@ -51,6 +53,7 @@ export default async function LabPage({ params }: { params: { track: string; lab
               <input type="hidden" name="lab_id" value={lab.id} />
               <input type="hidden" name="path" value={path} />
               <input type="hidden" name="done" value={done ? "1" : "0"} />
+              <input type="hidden" name="title" value={lab.title} />
               {!done && <label className="label">Submission link (GitHub, Drive, app)<input name="submission_url" type="url" className="input" placeholder="https://" /></label>}
               {done && submission && <a href={submission} className="break-all text-sm underline">{submission}</a>}
               <button className={done ? "btn-ghost text-madder" : "btn-red"}>{done ? "Mark as not done" : "Mark lab complete"}</button>

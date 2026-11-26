@@ -4,6 +4,8 @@ import { getCourse } from "@/lib/courseLabs";
 import { getUserAndProfile } from "@/lib/supabase/server";
 import { toggleLab } from "@/app/actions";
 import LabViewer from "@/components/LabViewer";
+import ColabButton from "@/components/ColabButton";
+import { logActivity } from "@/lib/activity";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,7 @@ export default async function CourseLabPage({ params }: { params: { course: stri
     if (user) {
       const { data } = await ctx.supabase.from("lab_progress").select("lab_id").eq("user_id", user.id).eq("lab_id", id).maybeSingle();
       done = !!data;
+      await logActivity(ctx.supabase, user, "lab_open", { lab: id, title: l.title });
     }
   } catch {}
   return (
@@ -39,7 +42,7 @@ export default async function CourseLabPage({ params }: { params: { course: stri
         <LabViewer base={l.base} />
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
           <div className="card grid gap-3">
-            <a href={l.colab} target="_blank" rel="noreferrer" className="btn-sun">Open notebook in Colab</a>
+            <ColabButton href={l.colab} lab={id} title={l.title} />
             <a href={`${l.base}/${l.notebook}`} download className="btn-ghost text-madder">Download notebook (.ipynb)</a>
             <a href={`${l.base}/bundle/dataset.zip`} download className="btn-ghost text-madder">Download dataset (.zip)</a>
             {l.datasets.length > 0 && <p className="text-xs text-mute">Includes: {l.datasets.join(", ")}</p>}
@@ -57,6 +60,7 @@ export default async function CourseLabPage({ params }: { params: { course: stri
                 <input type="hidden" name="lab_id" value={id} />
                 <input type="hidden" name="path" value={path} />
                 <input type="hidden" name="done" value={done ? "1" : "0"} />
+                <input type="hidden" name="title" value={l.title} />
                 <button className={done ? "btn-ghost w-full text-madder" : "btn-red w-full"}>{done ? "✓ Completed · undo" : "Mark lab complete"}</button>
               </form>
             ) : (
