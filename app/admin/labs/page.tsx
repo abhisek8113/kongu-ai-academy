@@ -1,7 +1,7 @@
 import { requireAdminPage, ago } from "@/lib/admin";
 import { courses } from "@/lib/courseLabs";
 import { tracks } from "@/lib/labs";
-import { setLabPublished } from "@/app/actions";
+import { setLabPublished, setPublicLab } from "@/app/actions";
 
 type Row = { id: string; title: string; group: string };
 
@@ -20,6 +20,8 @@ export default async function AdminLabs({ searchParams }: { searchParams: { sort
     supabase.from("lab_executions").select("lab_id, ok, error, created_at").order("created_at", { ascending: false }).limit(20000),
     supabase.from("support_tickets").select("lab, status").limit(5000),
   ]);
+  const { data: pub } = await supabase.from("platform_settings").select("value").eq("key", "public_lab").maybeSingle();
+  const publicLab = pub?.value ?? "playground/python";
   const off = new Set((settings ?? []).filter((s: any) => !s.published).map((s: any) => s.lab_id));
   const count = (arr: any[] | null, key: (x: any) => string | undefined) => { const m = new Map<string, number>(); (arr ?? []).forEach((x) => { const k = key(x); if (k) m.set(k, (m.get(k) ?? 0) + 1); }); return m; };
   const opened = count(opens, (a) => a.meta?.lab);
@@ -44,6 +46,11 @@ export default async function AdminLabs({ searchParams }: { searchParams: { sort
         ))}
       </dl>
 
+      <form action={setPublicLab} className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border border-cyan/40 p-4">
+        <label className="label min-w-[280px] flex-1">Public demo lab — the only lab open without login and membership
+          <select name="lab" defaultValue={publicLab} className="input">{rows.map((r) => <option key={r.id} value={r.id}>{r.group} · {r.title}</option>)}</select></label>
+        <button className="btn-red min-h-[40px] px-4 text-sm">Set as the one public lab</button>
+      </form>
       <div className="mt-6 flex gap-5 text-sm">
         {[["", "Catalogue order"], ["popular", "Most popular"], ["fails", "Most failures"]].map(([k, l]) => (
           <a key={k} href={`/admin/labs${k ? `?sort=${k}` : ""}`} className={(searchParams.sort ?? "") === k ? "font-medium text-ink underline decoration-madder underline-offset-8" : "text-mute hover:text-ink"}>{l}</a>
@@ -56,7 +63,7 @@ export default async function AdminLabs({ searchParams }: { searchParams: { sort
           <tbody>
             {list.map((r) => (
               <tr key={r.id}>
-                <td className="font-medium">{r.title}</td>
+                <td className="font-medium">{r.title}{r.id === publicLab && <span className="pill ml-2 border-cyan/40 text-cyan">Public demo</span>}</td>
                 <td className="text-mute">{r.group}</td>
                 <td className="text-right tabular-nums">{r.opens}</td>
                 <td className="text-right tabular-nums">{r.done}</td>

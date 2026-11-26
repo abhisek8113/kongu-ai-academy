@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { createTicket } from "@/app/actions";
 
-const CATEGORIES = ["Laboratory not loading", "Code execution failure", "Incorrect output", "Login problem", "Access problem", "Website performance", "Other technical issue"];
+const CATEGORIES = ["Laboratory not loading", "Code execution failure", "Incorrect output", "Login problem", "Logout problem", "Access problem", "Payment issue", "Dataset issue", "Task submission issue", "Website performance", "Other technical issue", "General query"];
 
 function Submit() {
   const { pending } = useFormStatus();

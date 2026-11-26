@@ -43,6 +43,22 @@ export default async function Dashboard() {
     if (!seen.has(a.meta.lab) && recent.length < 5) { seen.add(a.meta.lab); recent.push({ id: a.meta.lab, title: a.meta.title ?? labTitle(a.meta.lab), at: a.created_at }); }
   });
   const approved = profile?.status === "approved" || profile?.role === "admin";
+  await supabase.rpc("expire_subscriptions");
+  const [{ data: member }, { data: sub }, { count: subCount }, { count: runs }] = await Promise.all([
+    supabase.rpc("has_active_subscription"),
+    supabase.from("subscriptions").select("status, ends_at, plan_id").eq("user_id", user.id).order("ends_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("task_submissions").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase.from("lab_executions").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+  ]);
+  const steps = [
+    ["Create your account", true, "/dashboard"],
+    ["Verify your email", !!user.email_confirmed_at, "/dashboard"],
+    ["Try the free Python demo lab", !!runs || !!subCount, "/playground/python"],
+    ["Activate a membership", !!member, "/pricing"],
+    ["Open your first full lab", recent.some((r) => !r.id.startsWith("playground/python")), "/courses"],
+    ["Submit your first task", !!subCount, "/playground/sql"],
+  ] as const;
+  const nextStep = steps.find((x) => !x[1]);
 
   return (
     <div className="wrap py-10">
@@ -64,6 +80,15 @@ export default async function Dashboard() {
           <p className="mt-1 text-sm text-mute">{profile?.status === "rejected" ? "Please contact us on WhatsApp +91 95145 24599." : "You can open every lab and playground now. Saving progress and enrolment unlock once the academy approves your account."}</p>
         </div>
       )}
+
+      <section className="mt-8 rounded-xl border border-rule bg-panel/60 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg">Getting started · {steps.filter((x) => x[1]).length}/{steps.length}</h2>
+          {nextStep && <Link href={nextStep[2]} className="btn-red min-h-[36px] px-4 text-sm">Next: {nextStep[0]} →</Link>}
+        </div>
+        <div className="mt-3 h-1.5 rounded-full bg-rule"><div className="h-1.5 rounded-full bg-gradient-to-r from-madder to-cyan" style={{ width: `${(steps.filter((x) => x[1]).length / steps.length) * 100}%` }} /></div>
+        <ol className="mt-4 grid gap-2 text-sm sm:grid-cols-3">{steps.map(([t, ok, href], i) => <li key={t}><Link href={href} className={ok ? "text-mute line-through" : "hover:text-cyan"}>{ok ? "✓" : `${i + 1}.`} {t}</Link></li>)}</ol>
+      </section>
 
       <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-rule bg-rule lg:grid-cols-4">
         {[["Labs available to you", available], ["Labs completed", completed], ["Open support issues", tickets?.length ?? 0], ["Certificates", certs?.length ?? 0]].map(([k, v]) => (
@@ -103,6 +128,15 @@ export default async function Dashboard() {
           </section>
         </div>
         <aside className="space-y-8">
+          <section className="card">
+            <div className="flex items-center justify-between"><h2 className="text-lg">Membership</h2><Link href="/account/subscription" className="text-sm text-mute underline hover:text-ink">Manage</Link></div>
+            {profile?.role === "admin" ? <p className="mt-2 text-sm text-mute">Administrator — all labs unlocked.</p> : member ? (
+              <p className="mt-2 text-sm">Active{sub?.ends_at ? <> until <b>{new Date(sub.ends_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</b></> : ""}.</p>
+            ) : (
+              <><p className="mt-2 text-sm text-mute">{sub?.status === "expired" ? "Your membership has expired. Your progress is saved." : "No membership yet — only the free demo lab is open."}</p><Link href="/pricing" className="btn-red mt-3 min-h-[36px] px-4 text-sm">{sub?.status === "expired" ? "Renew" : "See plans"}</Link></>
+            )}
+            <Link href="/dashboard/submissions" className="mt-3 block text-sm text-mute underline hover:text-ink">My submissions{subCount ? ` (${subCount})` : ""}</Link>
+          </section>
           <section className="card">
             <h2 className="text-lg">Announcements</h2>
             <ul className="mt-3 space-y-4">

@@ -1,18 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { labIdFromPath } from "@/lib/labAccess";
 
-// Lab environments, lessons, notebooks, playgrounds and accounts require login.
-// Catalogue pages (/courses, /labs, /courses/<course>, /labs/<track>) stay public as previews.
-const PROTECTED = [
-  /^\/courses\/[^/]+\/[^/]+/,      // a course lab
-  /^\/labs\/[^/]+\/[^/]+/,         // a track lab
-  /^\/playground(\/|$)/,
-  /^\/course-labs\//,              // lesson HTML, notebooks, datasets
-  /^\/dashboard(\/|$)/,
-  /^\/admin(\/|$)/,
-  /^\/notifications(\/|$)/,
-  /^\/account(\/|$)/,
-];
+// Account areas: login required.
+const ACCOUNT = [/^\/dashboard(\/|$)/, /^\/admin(\/|$)/, /^\/notifications(\/|$)/, /^\/account(\/|$)/];
+
+function noStore(res: NextResponse) {
+  // Protected pages must never be served from the browser/back-forward cache after logout.
+  res.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
+  return res;
+}
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -35,38 +32,39 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
-  if (!user && PROTECTED.some((r) => r.test(path))) {
-    // Raw files (datasets/notebooks) get a plain 401 instead of a redirect.
-    if (path.startsWith("/course-labs/") && !path.endsWith(".html")) {
-      return new NextResponse("Please log in to Kongu AI Academy to download lab files.", { status: 401 });
-    }
+  const lab = labIdFromPath(path);
+  const isAccount = ACCOUNT.some((r) => r.test(path));
+  const redirect = (pathname: string, search = "") => {
     const url = request.nextUrl.clone();
-    const back = path.startsWith("/course-labs/") ? "/courses" : path + request.nextUrl.search;
-    url.pathname = "/login";
-    url.search = `?next=${encodeURIComponent(back)}`;
-    return NextResponse.redirect(url);
+    url.pathname = pathname; url.search = search;
+    return noStore(NextResponse.redirect(url));
+  };
+  const back = path.startsWith("/course-labs/") ? "/courses" : path + request.nextUrl.search;
+
+  if (lab) {
+    // The database decides: the single public lab, or a signed-in member with an active subscription.
+    const { data: allowed } = await supabase.rpc("has_lab_access", { lab });
+    if (!allowed) {
+      if (path.startsWith("/course-labs/") && !path.endsWith(".html")) {
+        return new NextResponse(user ? "An active membership is required to download lab files." : "Please log in to download lab files.", { status: user ? 403 : 401 });
+      }
+      if (!user) return redirect("/login", `?next=${encodeURIComponent(back)}`);
+      return redirect("/pricing", `?locked=${encodeURIComponent(back)}`);
+    }
   }
-  // Suspended accounts lose access to everything behind login.
-  if (user && PROTECTED.some((r) => r.test(path))) {
+  if (!user && isAccount) return redirect("/login", `?next=${encodeURIComponent(back)}`);
+
+  if (user && (isAccount || lab)) {
     const { data: p } = await supabase.from("profiles").select("status, role").eq("id", user.id).maybeSingle();
-    if (p?.status === "suspended" && p.role !== "admin") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/suspended";
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
+    if (p?.status === "suspended" && p.role !== "admin") return redirect("/suspended");
   }
-  // Logged-in users don't need the login/signup pages.
   if (user && (path === "/login" || path === "/signup")) {
-    const url = request.nextUrl.clone();
     const next = request.nextUrl.searchParams.get("next");
-    url.pathname = next && next.startsWith("/") ? next : "/dashboard";
-    url.search = "";
-    return NextResponse.redirect(url);
+    return redirect(next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
   }
-  return response;
+  return lab || isAccount ? noStore(response) : response;
 }
 
 export const config = {
-  matcher: ["/courses/:path*", "/labs/:path*", "/playground/:path*", "/playground", "/course-labs/:path*", "/dashboard/:path*", "/admin/:path*", "/notifications/:path*", "/account/:path*", "/login", "/signup"],
+  matcher: ["/courses/:path*", "/labs/:path*", "/playground/:path*", "/course-labs/:path*", "/dashboard/:path*", "/admin/:path*", "/notifications/:path*", "/account/:path*", "/login", "/signup"],
 };

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { logExecution } from "@/app/actions";
+import { logExecution, submitTask } from "@/app/actions";
 import ReportIssue from "@/components/ReportIssue";
 import type { Exercise } from "@/lib/playground";
 
@@ -38,6 +38,7 @@ export default function PythonRunner({ exercises, labId = "playground/python" }:
   const [code, setCode] = useState(ex.starter);
   const [out, setOut] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [saved, setSaved] = useState<string | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "running" | "failed">("loading");
   const worker = useRef<Worker | null>(null);
 
@@ -55,7 +56,7 @@ export default function PythonRunner({ exercises, labId = "playground/python" }:
   useEffect(() => { start(); return () => worker.current?.terminate(); }, []);
   useEffect(() => {
     try { const saved = localStorage.getItem(`kaa:${labId}:${ex.id}`); setCode(saved ?? ex.starter); } catch { setCode(ex.starter); }
-    setOut(""); setErr(null);
+    setOut(""); setErr(null); setSaved(null);
   }, [i]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const run = () => {
@@ -114,6 +115,8 @@ export default function PythonRunner({ exercises, labId = "playground/python" }:
             <p className="eyebrow">Your output</p>
             <pre className={`mt-2 min-h-[110px] overflow-x-auto rounded-lg border p-3 font-mono text-[13px] ${err ? "border-[#FF8A8A]/40 text-[#FFB3B3]" : matches ? "border-[#1f7a4d] text-[#5fd39a]" : "border-rule"}`}>{err ? `${out ? out + "\n" : ""}${err}` : out || "—"}</pre>
             {matches && <p className="mt-1 text-sm text-[#5fd39a]">✓ Matches the expected output</p>}
+            {out && !err && <button onClick={async () => { const r = await submitTask({ lab: labId, task: ex.id, answer: code, output: out, passed: !!matches }); setSaved("error" in r && r.error ? r.error : matches ? "Saved as passed ✓" : "Saved — output doesn't match yet"); }} className="mt-2 text-sm text-cyan underline">Submit this attempt</button>}
+            {saved && <p className="mt-1 text-xs text-mute">{saved}</p>}
           </div>
           <div>
             <p className="eyebrow">Expected output</p>

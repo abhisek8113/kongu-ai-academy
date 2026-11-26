@@ -6,6 +6,7 @@ import { toggleLab } from "@/app/actions";
 import LabViewer from "@/components/LabViewer";
 import ColabButton from "@/components/ColabButton";
 import ReportIssue from "@/components/ReportIssue";
+import SubmitTask from "@/components/SubmitTask";
 import { requirePublished } from "@/lib/published";
 import { logActivity } from "@/lib/activity";
 
@@ -48,6 +49,7 @@ export default async function CourseLabPage({ params }: { params: { course: stri
           <div className="card grid gap-3">
             <ColabButton href={l.colab} lab={id} title={l.title} />
             <ReportIssue lab={l.title} />
+            <div className="mt-6 w-full"><SubmitTask lab={id} /></div>
             <a href={`${l.base}/${l.notebook}`} download className="btn-ghost text-madder">Download notebook (.ipynb)</a>
             <a href={`${l.base}/bundle/dataset.zip`} download className="btn-ghost text-madder">Download dataset (.zip)</a>
             {l.datasets.length > 0 && <p className="text-xs text-mute">Includes: {l.datasets.join(", ")}</p>}

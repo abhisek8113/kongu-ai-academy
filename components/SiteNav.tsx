@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { signOut } from "@/app/actions";
+import LogoutButton from "@/components/LogoutButton";
 
 const links = [
   ["/", "Home"],
   ["/#programs", "Programs"],
+  ["/pricing", "Pricing"],
   ["/#labs", "AI Labs"],
   ["/resources", "Learning Resources"],
   ["/#about", "About"],
@@ -46,7 +47,7 @@ export default function SiteNav({ user, isAdmin, unread = 0 }: { user: boolean; 
               <Bell />
               <Link href="/dashboard" className="px-2 text-[14px] text-mute hover:text-ink">Dashboard</Link>
               {isAdmin && <Link href="/admin" className="px-2 text-[14px] text-gold hover:brightness-110">Admin</Link>}
-              <form action={signOut}><button className="px-2 text-[14px] text-mute hover:text-ink">Sign out</button></form>
+              <LogoutButton className="px-2 text-[14px] text-mute hover:text-ink" />
             </>
           ) : (
             <Link href="/login" className="px-2 text-[14px] text-mute hover:text-ink">Student Login</Link>
@@ -76,7 +77,7 @@ export default function SiteNav({ user, isAdmin, unread = 0 }: { user: boolean; 
             <Link href="/#contact" onClick={() => setOpen(false)} className="btn-red">Enquire Now</Link>
             {user ? <Link href="/dashboard" onClick={() => setOpen(false)} className="btn-ghost">Dashboard</Link> : <Link href="/login" onClick={() => setOpen(false)} className="btn-ghost">Student Login</Link>}
             {isAdmin && <Link href="/admin" onClick={() => setOpen(false)} className="btn-ghost text-gold">Admin</Link>}
-            {user && <form action={signOut}><button className="btn-ghost">Sign out</button></form>}
+            {user && <LogoutButton className="btn-ghost" />}
           </div>
         </nav>
       )}

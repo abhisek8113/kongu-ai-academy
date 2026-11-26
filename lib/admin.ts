@@ -48,6 +48,14 @@ export function describe(a: { action: string; meta: any }) {
     case "admin_enrolment": return `set ${m.student ?? "a student"} → ${m.status}${m.batch ? ` (${m.batch})` : ""}`;
     case "admin_lead": return `marked lead ${m.lead ?? ""} → ${m.status}`;
     case "admin_approval": return `${m.status === "approved" ? "approved" : m.status === "rejected" ? "rejected" : "reset"} ${m.student ?? "an account"}`;
+    case "membership_request": return `requested membership: ${m.plan}`;
+    case "payment_success": return `paid for ${m.plan} (₹${(m.amount ?? 0) / 100})`;
+    case "admin_grant_access": return `granted ${m.days} days of access`;
+    case "admin_revoke_access": return `revoked a membership`;
+    case "admin_plan": return `updated plan ${m.id} (₹${m.price})`;
+    case "admin_public_lab": return `set the public demo lab to ${m.lab}`;
+    case "task_submit": return `submitted ${m.lab} · ${m.task} (${m.status})`;
+    case "admin_review": return `reviewed submission #${m.id} → ${m.status}`;
     case "ticket_new": return `reported issue #${m.id} · ${m.category}${m.lab ? ` (${m.lab})` : ""}`;
     case "admin_ticket_update": return `updated issue #${m.id}${m.status ? ` → ${m.status}` : ""}`;
     case "admin_ticket_reply": return `replied to issue #${m.id}`;

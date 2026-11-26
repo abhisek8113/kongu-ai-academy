@@ -1,5 +1,6 @@
 import { getUserAndProfile } from "@/lib/supabase/server";
 import SiteNav from "@/components/SiteNav";
+import AuthSync from "@/components/AuthSync";
 
 export default async function Nav() {
   let user = null, profile: any = null, unread = 0;
@@ -13,5 +14,5 @@ export default async function Nav() {
   } catch {
     // Supabase not configured: public navigation only
   }
-  return <SiteNav user={!!user} isAdmin={profile?.role === "admin"} unread={unread} />;
+  return <><AuthSync signedIn={!!user} /><SiteNav user={!!user} isAdmin={profile?.role === "admin"} unread={unread} /></>;
 }

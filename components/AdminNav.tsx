@@ -7,6 +7,8 @@ const items = [
   ["/admin/activity", "Live activity"],
   ["/admin/students", "Students"],
   ["/admin/issues", "Issues"],
+  ["/admin/subscriptions", "Subscriptions"],
+  ["/admin/submissions", "Submissions"],
   ["/admin/labs", "Laboratories"],
   ["/admin/announcements", "Announcements"],
   ["/admin/leads", "Leads"],
