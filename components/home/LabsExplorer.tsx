@@ -1,11 +1,10 @@
 "use client";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import ColabButton from "@/components/ColabButton";
 
 export type LabCard = {
   id: string; href: string; num: number; title: string; course: string; courseSlug: string;
-  track: string; level: string; time: string; datasets: string[]; skills: string[]; colab: string;
+  track: string; level: string; time: string; datasets: string[]; skills: string[]; colab?: string;
 };
 
 const LEVELS = ["All levels", "Beginner", "Intermediate", "Advanced"];
@@ -70,8 +69,7 @@ export default function LabsExplorer({ labs, courses }: { labs: LabCard[]; cours
               </ul>
             )}
             <div className="relative z-10 mt-auto flex gap-2 pt-5">
-              <ColabButton href={l.colab} lab={`${l.courseSlug}/${l.id}`} title={l.title} compact />
-              <Link href={l.href} className="btn-ghost min-h-[40px] px-3 text-sm">Lesson</Link>
+              <Link href={l.href} className="btn-ghost min-h-[40px] px-3 text-sm">🔒 Open lab — members</Link>
             </div>
           </li>
         ))}

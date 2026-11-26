@@ -74,7 +74,7 @@ export default function Home() {
   const labCards = courses.flatMap((c) =>
     c.labs.map((l) => ({
       id: l.lab, href: `/courses/${c.slug}/${l.lab}`, num: l.num, title: l.title, course: c.name, courseSlug: c.slug,
-      track: l.track, level: l.level, time: l.time, colab: l.colab, skills: l.goals,
+      track: l.track, level: l.level, time: l.time, skills: l.goals,
       datasets: l.datasets.filter((d) => /\.(csv|tsv|sqlite|json)$/.test(d)),
     }))
   );
@@ -298,9 +298,8 @@ export default function Home() {
             <dl className="mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2">
               {[
                 ["Academic background", "M.Sc. Statistics, PSG College of Arts and Science"],
-                ["Experience", "Six years of teaching and training"],
                 ["Corporate training", "Data analytics and AI training, including SLB"],
-                ["Colleges", "Training programmes at KGiSL, Nandha and Kaleeswari"],
+                ["Colleges", "Training programmes at Nandha and Kaleeswari"],
                 ["Technical expertise", "Python, statistics, machine learning, Generative AI, Power BI, SQL"],
                 ["Curriculum", "Author of the academy's lab courses and Colab notebooks"],
               ].map(([k, v]) => (
