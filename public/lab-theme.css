@@ -1,0 +1,23 @@
+/* Kongu AI Academy lesson theme — loaded after each lesson's own <style>, so these rules win. */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+body { font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 16px; line-height: 1.65; color: #111; max-width: 46rem; margin: 2rem auto 3rem; padding: 0 1.25rem; }
+h1, h2, h3, h4, h5, h6 { font-family: "IBM Plex Sans", system-ui, sans-serif; font-weight: 600; letter-spacing: -0.01em; color: #111; }
+h1 { font-size: 1.75rem; border-bottom: 1px solid #111; padding-bottom: 0.5rem; }
+h2 { font-size: 1.3rem; border-bottom: 1px solid #d9d9d6; padding-bottom: 0.3rem; margin-top: 2.2rem; }
+a { color: #b3261e; text-underline-offset: 3px; }
+code, pre { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.88em; }
+code { background: #f5f5f3; border-radius: 0; }
+pre { background: #f5f5f3; border: 1px solid #d9d9d6; border-radius: 0; }
+blockquote { border-left: 2px solid #b3261e; background: transparent; color: #333; }
+table { font-family: "IBM Plex Sans", system-ui, sans-serif; }
+th, td { border: 0; border-bottom: 1px solid #d9d9d6; }
+th { background: transparent; border-bottom: 1px solid #111; font-family: "IBM Plex Mono", monospace; font-weight: 400; font-size: 0.8rem; color: #5f5f5b; }
+.meta { font-family: "IBM Plex Sans", system-ui, sans-serif; background: #fff; border: 0; border-top: 1px solid #111; border-bottom: 1px solid #111; border-radius: 0; padding: 0.75rem 0; }
+.meta strong { font-family: "IBM Plex Mono", monospace; font-weight: 400; font-size: 0.8rem; color: #5f5f5b; }
+details { background: #fff; border: 1px solid #d9d9d6; border-radius: 0; }
+details summary { font-family: "IBM Plex Sans", system-ui, sans-serif; font-weight: 500; }
+details[open] summary { color: #b3261e; }
+.next { background: #fff; border: 0; border-left: 2px solid #b3261e; border-radius: 0; padding: 0.25rem 0 0.25rem 1rem; }
+hr { border-top: 1px solid #d9d9d6; }
+footer { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; color: #5f5f5b; border-top: 1px solid #d9d9d6; }
+img { max-width: 100%; height: auto; }
