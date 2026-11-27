@@ -366,3 +366,63 @@ export async function reviewSubmission(f: FormData) {
   await logActivity(supabase, user, "admin_review", { id, status });
   revalidatePath("/admin/submissions");
 }
+
+// ---------- Admin: create accounts and set passwords ----------
+function strongPassword() {
+  const a = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  const b = crypto.getRandomValues(new Uint8Array(10));
+  return "Kai-" + Array.from(b, (x) => a[x % a.length]).join("");
+}
+
+export async function adminCreateUser(_: unknown, f: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const email = s(f, "email").toLowerCase(), full_name = s(f, "full_name").slice(0, 120);
+  const password = s(f, "password") || strongPassword();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Enter a valid email." };
+  if (full_name.length < 2) return { error: "Enter the student's name." };
+  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  const meta = { full_name, phone: s(f, "phone").slice(0, 20), institution: s(f, "institution").slice(0, 160) };
+  let id: string | undefined, confirmed = false;
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const { adminDb } = await import("@/lib/payments");
+    const { data, error } = await adminDb().auth.admin.createUser({ email, password, email_confirm: true, user_metadata: meta });
+    if (error) return { error: error.message.includes("already") ? "An account with this email already exists." : error.message };
+    id = data.user?.id; confirmed = true;
+  } else {
+    const { createClient: anon } = await import("@supabase/supabase-js");
+    const sb = anon(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
+    const { data, error } = await sb.auth.signUp({ email, password, options: { data: meta, emailRedirectTo: `${origin()}/auth/callback?next=/dashboard` } });
+    if (error) return { error: error.message };
+    if (!data.user?.identities?.length) return { error: "An account with this email already exists." };
+    id = data.user?.id;
+  }
+  if (!id) return { error: "Account could not be created." };
+  // Approve (and optionally grant access) with the admin's own session, so the database checks still apply.
+  if (s(f, "approve")) await supabase.from("profiles").update({ status: "approved" }).eq("id", id);
+  const days = parseInt(s(f, "days")) || 0;
+  if (days > 0) await supabase.from("subscriptions").insert({ user_id: id, status: "active", source: "complimentary", ends_at: new Date(Date.now() + Math.min(days, 3650) * 86400000).toISOString(), note: "Created by admin", granted_by: user.id });
+  await logActivity(supabase, user, "admin_create_user", { target: id, email, days });
+  revalidatePath("/admin/students");
+  return { ok: true, id, email, password, confirmed };
+}
+
+export async function adminSetPassword(_: unknown, f: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const id = s(f, "user_id");
+  const { data: prof } = await supabase.from("profiles").select("email, role").eq("id", id).maybeSingle();
+  if (!prof) return { error: "Student not found." };
+  if (prof.role === "admin") return { error: "Change your own password from the account page." };
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const { error } = await supabase.auth.resetPasswordForEmail(prof.email, { redirectTo: `${origin()}/auth/callback?next=/account/password` });
+    if (error) return { error: error.message };
+    await logActivity(supabase, user, "admin_password_reset", { target: id, via: "email" });
+    return { ok: true, emailed: true, email: prof.email };
+  }
+  const password = s(f, "password") || strongPassword();
+  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  const { adminDb } = await import("@/lib/payments");
+  const { error } = await adminDb().auth.admin.updateUserById(id, { password });
+  if (error) return { error: error.message };
+  await logActivity(supabase, user, "admin_password_reset", { target: id, via: "set" });
+  return { ok: true, password, email: prof.email };
+}

@@ -1,3 +1,5 @@
+import { SetPasswordForm } from "@/components/AdminUserForms";
+import { grantAccess, revokeAccess } from "@/app/actions";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdminPage, ago, fmtTime, labTitle } from "@/lib/admin";
@@ -34,6 +36,8 @@ export default async function StudentDetail({ params }: { params: { id: string }
         <dt className="font-mono text-[13px] text-mute">Joined</dt><dd>{fmtTime(p.created_at)}</dd>
         <dt className="font-mono text-[13px] text-mute">Last active</dt><dd>{ago(p.last_seen_at)}</dd>
       </dl>
+
+      <AdminStudentExtras id={p.id} role={p.role} />
 
       <section className="mt-10">
         <h2 className="text-xl">Progress · {done.size} labs completed · {opened.size} opened</h2>
@@ -90,6 +94,49 @@ export default async function StudentDetail({ params }: { params: { id: string }
           </div>
         </section>
       </div>
+    </div>
+  );
+}
+
+
+async function AdminStudentExtras({ id, role }: { id: string; role: string }) {
+  const { createClient } = await import("@/lib/supabase/server");
+  const sb = createClient();
+  const [{ data: subs }, { data: pays }, { data: subm }, { data: tix }, { data: plans }] = await Promise.all([
+    sb.from("subscriptions").select("*").eq("user_id", id).order("created_at", { ascending: false }),
+    sb.from("payment_transactions").select("*").eq("user_id", id).order("created_at", { ascending: false }),
+    sb.from("task_submissions").select("id, lab_id, task_id, status, created_at").eq("user_id", id).order("created_at", { ascending: false }).limit(20),
+    sb.from("support_tickets").select("id, category, status, created_at").eq("user_id", id).order("created_at", { ascending: false }),
+    sb.from("subscription_plans").select("id, name"),
+  ]);
+  const live = (subs ?? []).find((x: any) => ["active", "trial"].includes(x.status) && (!x.ends_at || new Date(x.ends_at) > new Date()));
+  return (
+    <div className="mt-8 grid gap-6 xl:grid-cols-2">
+      <section className="card">
+        <h2 className="text-lg">Membership</h2>
+        <p className="mt-2 text-sm">{role === "admin" ? "Administrator (full access)" : live ? <>Active until <b>{live.ends_at ? fmtTime(live.ends_at) : "no end date"}</b> · {live.source}</> : "No active membership — only the free demo lab is open."}</p>
+        <form action={grantAccess} className="mt-3 flex flex-wrap items-end gap-2">
+          <input type="hidden" name="user_id" value={id} />
+          <label className="label w-24">Days<input name="days" type="number" min={1} defaultValue={30} className="input" /></label>
+          <label className="label">Plan<select name="plan_id" className="input"><option value="">Complimentary</option>{(plans ?? []).map((x: any) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+          <input name="note" placeholder="Note / UPI ref" className="input w-40" />
+          <button className="btn-red min-h-[40px] px-4 text-sm">Grant / extend</button>
+        </form>
+        <ul className="mt-4 space-y-1 text-sm">
+          {(subs ?? []).map((x: any) => <li key={x.id} className="flex flex-wrap items-center justify-between gap-2"><span>{x.source} · <span className="pill">{x.status}</span></span><span className="text-mute">{x.ends_at ? fmtTime(x.ends_at) : "—"}{["active", "trial"].includes(x.status) && <form action={revokeAccess} className="ml-2 inline"><input type="hidden" name="id" value={x.id} /><button className="text-xs text-[#FF8A8A] underline">Revoke</button></form>}</span></li>)}
+        </ul>
+        {!!pays?.length && <p className="mt-3 text-sm text-mute">Payments: {pays.map((x: any) => `₹${x.amount_paise / 100} ${x.status}`).join(" · ")}</p>}
+      </section>
+      {role !== "admin" ? <SetPasswordForm userId={id} /> : <div />}
+      <section className="card">
+        <h2 className="text-lg">Submissions</h2>
+        <ul className="mt-2 space-y-1 text-sm">{(subm ?? []).map((x: any) => <li key={x.id} className="flex justify-between gap-2"><span>{x.lab_id} · {x.task_id}</span><span className="pill">{x.status}</span></li>)}{!subm?.length && <li className="text-mute">None.</li>}</ul>
+        <Link href="/admin/submissions?status=all" className="mt-2 inline-block text-sm text-mute underline">Review submissions</Link>
+      </section>
+      <section className="card">
+        <h2 className="text-lg">Issues</h2>
+        <ul className="mt-2 space-y-1 text-sm">{(tix ?? []).map((x: any) => <li key={x.id} className="flex justify-between gap-2"><Link href={`/admin/issues/${x.id}`} className="hover:text-cyan">#{x.id} {x.category}</Link><span className="pill">{x.status}</span></li>)}{!tix?.length && <li className="text-mute">None.</li>}</ul>
+      </section>
     </div>
   );
 }

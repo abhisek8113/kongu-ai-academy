@@ -56,6 +56,8 @@ export function describe(a: { action: string; meta: any }) {
     case "admin_public_lab": return `set the public demo lab to ${m.lab}`;
     case "task_submit": return `submitted ${m.lab} · ${m.task} (${m.status})`;
     case "admin_review": return `reviewed submission #${m.id} → ${m.status}`;
+    case "admin_create_user": return `created an account for ${m.email}${m.days ? ` with ${m.days} days access` : ""}`;
+    case "admin_password_reset": return m.via === "email" ? "sent a password-reset email to a student" : "set a new password for a student";
     case "admin_login": return "signed in to the admin console";
     case "admin_login_denied": return "tried to sign in to the admin console (denied)";
     case "ticket_new": return `reported issue #${m.id} · ${m.category}${m.lab ? ` (${m.lab})` : ""}`;

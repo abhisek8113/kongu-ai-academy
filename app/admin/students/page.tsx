@@ -1,3 +1,4 @@
+import { CreateUserForm } from "@/components/AdminUserForms";
 import Link from "next/link";
 import { requireAdminPage, ago, TOTAL_LABS } from "@/lib/admin";
 import { setStudentStatus } from "@/app/actions";
@@ -22,6 +23,10 @@ export default async function StudentsPage({ searchParams }: { searchParams: { q
   return (
     <div>
       <h1 className="text-[32px] font-semibold leading-tight">Students</h1>
+      <details className="mt-4" open={!rows?.length}>
+        <summary className="btn-red inline-flex cursor-pointer list-none min-h-[40px] px-4 text-sm">+ Create student account</summary>
+        <div className="mt-4 max-w-3xl"><CreateUserForm /></div>
+      </details>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
         <form className="flex gap-2">
           <input name="q" defaultValue={q} placeholder="Name, email, phone or college" className="input min-h-[36px] w-72 py-1 text-sm" />
