@@ -46,11 +46,14 @@ export default function SiteNav({ user, isAdmin, unread = 0 }: { user: boolean; 
             <>
               <Bell />
               <Link href="/dashboard" className="px-2 text-[14px] text-mute hover:text-ink">Dashboard</Link>
-              {isAdmin && <Link href="/admin" className="px-2 text-[14px] text-gold hover:brightness-110">Admin</Link>}
+              {isAdmin && <Link href="/admin" className="px-2 text-[14px] text-gold hover:brightness-110">Admin console</Link>}
               <LogoutButton className="px-2 text-[14px] text-mute hover:text-ink" />
             </>
           ) : (
-            <Link href="/login" className="px-2 text-[14px] text-mute hover:text-ink">Student Login</Link>
+            <>
+              <Link href="/login" className="px-2 text-[14px] text-mute hover:text-ink">Student Login</Link>
+              <Link href="/admin-login" className="px-2 text-[14px] text-gold hover:brightness-110">Admin Login</Link>
+            </>
           )}
           <Link href="/#contact" className="btn-red ml-2 min-h-[40px] px-4 text-[14px]">Enquire Now</Link>
         </div>
@@ -75,7 +78,7 @@ export default function SiteNav({ user, isAdmin, unread = 0 }: { user: boolean; 
           ))}
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/#contact" onClick={() => setOpen(false)} className="btn-red">Enquire Now</Link>
-            {user ? <Link href="/dashboard" onClick={() => setOpen(false)} className="btn-ghost">Dashboard</Link> : <Link href="/login" onClick={() => setOpen(false)} className="btn-ghost">Student Login</Link>}
+            {user ? <Link href="/dashboard" onClick={() => setOpen(false)} className="btn-ghost">Dashboard</Link> : <><Link href="/login" onClick={() => setOpen(false)} className="btn-ghost">Student Login</Link><Link href="/admin-login" onClick={() => setOpen(false)} className="btn-ghost text-gold">Admin Login</Link></>}
             {isAdmin && <Link href="/admin" onClick={() => setOpen(false)} className="btn-ghost text-gold">Admin</Link>}
             {user && <LogoutButton className="btn-ghost" />}
           </div>
