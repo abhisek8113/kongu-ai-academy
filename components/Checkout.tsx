@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { requestMembership } from "@/app/actions";
 
 declare global { interface Window { Razorpay?: any } }
@@ -10,7 +11,15 @@ const loadRzp = () => new Promise<void>((res, rej) => {
   document.body.appendChild(s);
 });
 
-export default function Checkout({ plan, planName, enabled, signedIn }: { plan: string; planName: string; enabled: boolean; signedIn: boolean }) {
+export function LockedNotice() {
+  const [show, setShow] = useState(false);
+  useEffect(() => { setShow(new URLSearchParams(location.search).has("locked")); }, []);
+  return show ? <p className="mt-6 rounded-xl border border-gold/40 bg-gold/10 p-4 text-sm text-gold">That lab needs an active membership. Choose a plan below to unlock it.</p> : null;
+}
+
+export default function Checkout({ plan, planName, enabled }: { plan: string; planName: string; enabled: boolean }) {
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => { createClient().auth.getSession().then(({ data }) => setSignedIn(!!data.session)); }, []);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   if (!signedIn) return <a href={`/signup?next=/pricing`} className="btn-red w-full justify-center">Create account to continue</a>;

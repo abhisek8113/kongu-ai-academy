@@ -1,25 +1,22 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient as anon } from "@supabase/supabase-js";
 import { paymentsEnabled } from "@/lib/payments";
-import Checkout from "@/components/Checkout";
+import Checkout, { LockedNotice } from "@/components/Checkout";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 export const metadata = { title: "Pricing", description: "Kongu AI Academy membership plans: one free demo lab, full lab access with a membership." };
 const inr = (p: number) => "₹" + (p / 100).toLocaleString("en-IN");
 
-export default async function Pricing({ searchParams }: { searchParams: { locked?: string } }) {
-  const supabase = createClient();
-  const [{ data: plans }, { data: { user } }] = await Promise.all([
-    supabase.from("subscription_plans").select("*").eq("active", true).order("sort"),
-    supabase.auth.getUser(),
-  ]);
+export default async function Pricing() {
+  const supabase = anon(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
+  const { data: plans } = await supabase.from("subscription_plans").select("*").eq("active", true).order("sort");
   const enabled = paymentsEnabled();
   return (
     <div className="wrap py-12">
       <p className="kicker">Pricing</p>
       <h1 className="mt-3 text-4xl">Simple memberships</h1>
       <p className="mt-3 max-w-2xl text-mute">Try the Python demo lab free, without an account. A membership unlocks every published lab, graded exercises, submissions and progress tracking.</p>
-      {searchParams.locked && <p className="mt-6 rounded-xl border border-gold/40 bg-gold/10 p-4 text-sm text-gold">That lab needs an active membership. Choose a plan below to unlock it.</p>}
+      <LockedNotice />
       {!enabled && <p className="mt-6 rounded-xl border border-rule p-4 text-sm text-mute">Online payment is being set up. Pick a plan to send a request — the academy confirms payment by UPI or bank transfer and activates your membership the same day.</p>}
       <div className="mt-8 grid gap-5 lg:grid-cols-4">
         <div className="card flex flex-col">
@@ -34,7 +31,7 @@ export default async function Pricing({ searchParams }: { searchParams: { locked
             <p className="mt-2 font-display text-3xl">{inr(p.price_paise)}<span className="text-sm text-mute"> / {p.period_days} days</span></p>
             <p className="mt-2 text-sm text-mute">{p.description}</p>
             <ul className="mt-4 flex-1 space-y-2 text-sm">{(p.features ?? []).map((f: string) => <li key={f}>✓ {f}</li>)}</ul>
-            <div className="mt-6"><Checkout plan={p.id} planName={p.name} enabled={enabled} signedIn={!!user} /></div>
+            <div className="mt-6"><Checkout plan={p.id} planName={p.name} enabled={enabled} /></div>
           </div>
         ))}
       </div>
