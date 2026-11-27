@@ -48,7 +48,7 @@ export default function Footer() {
       </div>
       <div className="wrap flex flex-wrap justify-between gap-3 border-t border-rule py-6 text-xs text-mute">
         <span>© {new Date().getFullYear()} Kongu AI Academy. All rights reserved.</span>
-        <span className="flex gap-5"><Link href="/privacy" className="hover:text-ink">Privacy policy</Link><Link href="/terms" className="hover:text-ink">Terms & conditions</Link></span>
+        <span className="flex gap-5"><Link href="/privacy" className="hover:text-ink">Privacy policy</Link><Link href="/terms" className="hover:text-ink">Terms & conditions</Link><Link href="/admin-login" className="hover:text-ink">Admin</Link></span>
       </div>
     </footer>
   );

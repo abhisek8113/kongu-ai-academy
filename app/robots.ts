@@ -4,7 +4,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://kongu-ai-academy.verce
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/dashboard"] }],
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/admin-login", "/dashboard"] }],
     sitemap: `${SITE}/sitemap.xml`,
   };
 }

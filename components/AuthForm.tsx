@@ -8,13 +8,15 @@ function Submit({ label }: { label: string }) {
   return <button className="btn-red w-full" disabled={pending}>{pending ? "Please wait…" : label}</button>;
 }
 
-export default function AuthForm({ mode, next, notice }: { mode: "login" | "signup"; next?: string; notice?: string }) {
+export default function AuthForm({ mode, next, notice, portal = "student" }: { mode: "login" | "signup"; next?: string; notice?: string; portal?: "student" | "admin" }) {
+  const admin = portal === "admin";
   const [state, action] = useFormState(mode === "login" ? signIn : signUp, null as any);
   return (
     <form action={action} className="card grid gap-4 p-7">
       <div>
-        <p className="kicker">{mode === "login" ? "Student login" : "Join Kongu AI Academy"}</p>
-        <h1 className="mt-2 text-3xl">{mode === "login" ? "Welcome back" : "Create your account"}</h1>
+        <p className={`kicker ${admin ? "text-gold" : ""}`}>{admin ? "Administrator console" : mode === "login" ? "Student login" : "Join Kongu AI Academy"}</p>
+        <h1 className="mt-2 text-3xl">{admin ? "Admin sign in" : mode === "login" ? "Welcome back" : "Create your account"}</h1>
+        {admin && <p className="mt-2 text-sm text-mute">Restricted area. Sign-in attempts are logged.</p>}
         {mode === "login" && next && <p className="mt-2 text-sm text-mute">Log in to open the lab you requested.</p>}
         {mode === "signup" && <p className="mt-2 text-sm text-mute">Free to join. Accounts are approved by the academy before lab progress and enrolment are enabled.</p>}
       </div>
@@ -34,12 +36,13 @@ export default function AuthForm({ mode, next, notice }: { mode: "login" | "sign
         <input name="password" type="password" required minLength={8} className="input" autoComplete={mode === "login" ? "current-password" : "new-password"} />
       </label>
       <input type="hidden" name="next" value={next ?? ""} />
+      <input type="hidden" name="portal" value={portal} />
       {state?.error && <p role="alert" className="text-sm text-[#FF8A8A]">{state.error}</p>}
       {state?.ok && <p role="status" className="text-sm text-[#5fd39a]">{state.ok}</p>}
       <Submit label={mode === "login" ? "Log in" : "Create account"} />
-      <p className="text-sm text-mute">
+      {!admin && <p className="text-sm text-mute">
         {mode === "login" ? <>New here? <Link href="/signup" className="text-ink underline">Create an account</Link></> : <>Have an account? <Link href="/login" className="text-ink underline">Log in</Link></>}
-      </p>
+      </p>}
     </form>
   );
 }

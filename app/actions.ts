@@ -22,10 +22,24 @@ export async function signOut(): Promise<{ ok: true } | { error: string }> {
 export async function signIn(_: unknown, f: FormData) {
   const supabase = createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email: s(f, "email"), password: s(f, "password") });
-  if (error) return { error: error.message };
-  await logActivity(supabase, data.user, "login");
+  if (error) return { error: error.message === "Invalid login credentials" ? "Wrong email or password." : error.message };
+  // Separate doors: the admin account can only sign in on the admin login, students only on the student login.
+  const portal = s(f, "portal") === "admin" ? "admin" : "student";
+  const { data: prof } = await supabase.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
+  const isAdmin = prof?.role === "admin";
+  if (portal === "student" && isAdmin) {
+    await supabase.auth.signOut({ scope: "local" });
+    return { error: "This is the administrator account. Please use the Admin login." };
+  }
+  if (portal === "admin" && !isAdmin) {
+    await supabase.auth.signOut({ scope: "local" });
+    await logActivity(supabase, data.user, "admin_login_denied").catch(() => {});
+    return { error: "This account does not have administrator access." };
+  }
+  await logActivity(supabase, data.user, portal === "admin" ? "admin_login" : "login");
   const next = s(f, "next");
-  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
+  const safe = next.startsWith("/") && !next.startsWith("//") ? next : "";
+  redirect(portal === "admin" ? (safe.startsWith("/admin") ? safe : "/admin") : (safe && !safe.startsWith("/admin") ? safe : "/dashboard"));
 }
 
 export async function signUp(_: unknown, f: FormData) {

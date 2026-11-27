@@ -52,12 +52,13 @@ export async function middleware(request: NextRequest) {
       return redirect("/pricing", `?locked=${encodeURIComponent(back)}`);
     }
   }
-  if (!user && isAccount) return redirect("/login", `?next=${encodeURIComponent(back)}`);
+  if (!user && isAccount) return redirect(path.startsWith("/admin") ? "/admin-login" : "/login", `?next=${encodeURIComponent(back)}`);
 
   if (user && (isAccount || lab)) {
     const { data: p } = await supabase.from("profiles").select("status, role").eq("id", user.id).maybeSingle();
     if (p?.status === "suspended" && p.role !== "admin") return redirect("/suspended");
   }
+  if (user && path === "/admin-login") return redirect("/admin");
   if (user && (path === "/login" || path === "/signup")) {
     const next = request.nextUrl.searchParams.get("next");
     return redirect(next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
@@ -66,5 +67,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/courses/:path*", "/labs/:path*", "/playground/:path*", "/course-labs/:path*", "/dashboard/:path*", "/admin/:path*", "/notifications/:path*", "/account/:path*", "/login", "/signup"],
+  matcher: ["/courses/:path*", "/labs/:path*", "/playground/:path*", "/course-labs/:path*", "/dashboard/:path*", "/admin/:path*", "/notifications/:path*", "/account/:path*", "/login", "/signup", "/admin-login"],
 };
